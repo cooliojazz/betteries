@@ -1,0 +1,16 @@
+[
+{
+  "modid": "betteries",
+  "name": "Betteries",
+  "description": "All the energy storage you could ever want",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["cooliojazz"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
