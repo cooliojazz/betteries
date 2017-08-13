@@ -24,7 +24,7 @@ public class Betteries {
 
     public Betteries() {
         LogManager.getLogger(MODID).log(Level.INFO, "[Betteries] Created class Betteries");
-            MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(this);
     }
     
     @EventHandler

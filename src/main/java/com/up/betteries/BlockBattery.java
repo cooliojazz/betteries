@@ -13,6 +13,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraftforge.energy.EnergyStorage;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 
 public class BlockBattery extends Block implements ITileEntityProvider {
 
@@ -29,14 +31,36 @@ public class BlockBattery extends Block implements ITileEntityProvider {
 
     @Override
     public TileEntity createNewTileEntity(World world, int i) {
-        return new TileEntityBattery();
+        TileEntityBattery te = new TileEntityBattery();
+        te.setWorld(world);
+        return te;
+    }
+
+    @Override
+    public void onBlockAdded(World w, BlockPos pos, IBlockState state) {
+        LogManager.getLogger(Betteries.MODID).log(Level.INFO, "[Betteries] Block added");
+        TileEntityBattery te = (TileEntityBattery)w.getTileEntity(pos);
+        TileEntityBatteryMultiblock parent = te.getParentOfNeighbors();
+        if (parent != null) {
+            te.setParent(parent);
+            parent.children++;
+        }
     }
 
     @Override
     public boolean onBlockActivated(World world, BlockPos bp, IBlockState bs, EntityPlayer ep, EnumHand hand, EnumFacing face, float f1, float f2, float f3) {
         if (!world.isRemote) {
             EnergyStorage es = ((TileEntityBattery)world.getTileEntity(bp)).store;
-            if (((TileEntityBattery)world.getTileEntity(bp)).isMultiblock()) ep.sendMessage(new TextComponentString(es.getEnergyStored() + "/" + es.getMaxEnergyStored()));
+            TileEntityBattery te = (TileEntityBattery)world.getTileEntity(bp);
+            if (te.isMultiblock()) {
+                ep.sendMessage(new TextComponentString(es.getEnergyStored() + "/" + es.getMaxEnergyStored()));
+            } else {
+                if (te.getParent() == null) {
+                    ep.sendMessage(new TextComponentString(te.children + 1 + "/8"));
+                } else {
+                    ep.sendMessage(new TextComponentString("Child of " + te.getParent().getPos()));
+                }
+            }
         }
         return true;
     }

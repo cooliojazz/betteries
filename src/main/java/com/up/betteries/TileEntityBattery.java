@@ -1,7 +1,6 @@
 package com.up.betteries;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.capabilities.Capability;
@@ -20,7 +19,6 @@ public class TileEntityBattery extends TileEntityBatteryMultiblock implements IT
         store.receiveEnergy((int)(Math.random() * 1000), false);
     }
     
-    
     @Override
     public void update() {
 //        System.out.println(store.getEnergyStored() + "/" + store.getMaxEnergyStored());
@@ -28,9 +26,9 @@ public class TileEntityBattery extends TileEntityBatteryMultiblock implements IT
 
     @Override
     public void readFromNBT(NBTTagCompound nbttc) {
+        super.readFromNBT(nbttc);
         store.extractEnergy(store.getEnergyStored(), false);
         store.receiveEnergy(nbttc.getInteger("energy"), false);
-        super.readFromNBT(nbttc);
     }
     
     @Override
@@ -55,6 +53,4 @@ public class TileEntityBattery extends TileEntityBatteryMultiblock implements IT
         return super.getCapability(cpblt, ef);
     }
     
-    
-
 }
