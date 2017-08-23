@@ -1,6 +1,8 @@
 package com.up.betteries;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -12,39 +14,41 @@ import org.apache.logging.log4j.LogManager;
  * @author Ricky
  */
 public class TileEntityBatteryMultiblock extends TileEntity {
-    private TileEntityBatteryMultiblock parent = null;
+    
     public int children = 0;
-
+    private BlockPos parentpos = null;
+    
     @Override
     public void readFromNBT(NBTTagCompound nbttc) {
         super.readFromNBT(nbttc);
         if (nbttc.getBoolean("child")) {
-            parent = (TileEntityBatteryMultiblock)getWorld().getTileEntity(new BlockPos(nbttc.getInteger("px"), nbttc.getInteger("py"), nbttc.getInteger("pz")));
+            parentpos = new BlockPos(nbttc.getInteger("px"), nbttc.getInteger("py"), nbttc.getInteger("pz"));
         } else {
-            parent = null;
+            children = nbttc.getInteger("children");
         }
+        getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
     }
     
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbttc) {
-        LogManager.getLogger(Betteries.MODID).log(Level.INFO, "[Betteries] Wrote TEBM NBT");
         if (hasParent()) {
             nbttc.setBoolean("child", true);
-            nbttc.setInteger("px", parent.getPos().getX());
-            nbttc.setInteger("py", parent.getPos().getY());
-            nbttc.setInteger("pz", parent.getPos().getZ());
+            nbttc.setInteger("px", parentpos.getX());
+            nbttc.setInteger("py", parentpos.getY());
+            nbttc.setInteger("pz", parentpos.getZ());
         } else {
             nbttc.setBoolean("child", false);
+            nbttc.setInteger("children", children);
         }
         return super.writeToNBT(nbttc);
     }
     
     public boolean isMultiblock() {
-        return hasParent() ? parent.isMultiblock() : children > 6;
+        return hasParent() ? getParent().isMultiblock() : children > 6;
     }
     
     public boolean hasParent() {
-        return parent != null;
+        return parentpos != null;
     }
     
     public TileEntityBatteryMultiblock getParentOfNeighbors() {
@@ -98,12 +102,27 @@ public class TileEntityBatteryMultiblock extends TileEntity {
         }
         return null;
     }
-
+    
     public TileEntityBatteryMultiblock getParent() {
-        return parent;
+        if (parentpos == null) return null;
+        World w = getWorld();
+        TileEntity te = w.getTileEntity(parentpos);
+        return (TileEntityBatteryMultiblock)te;
     }
+    
     public void setParent(TileEntityBatteryMultiblock parent) {
-        this.parent = parent;
+        parentpos = parent.getPos();
+    }
+
+    @Override
+    public SPacketUpdateTileEntity getUpdatePacket() {
+        return new SPacketUpdateTileEntity(pos, 0, writeToNBT(new NBTTagCompound()));
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        readFromNBT(pkt.getNbtCompound());
+        LogManager.getLogger(Betteries.MODID).log(Level.INFO, "[Betteries] Received update packet. Now " + getPos() + " is " + isMultiblock());
     }
     
 }

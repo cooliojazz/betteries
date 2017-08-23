@@ -1,8 +1,10 @@
 package com.up.betteries;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -20,7 +22,8 @@ public class Betteries {
     public static final String MODID = "betteries";
     public static final String VERSION = "1.0";
     
-    public BlockBattery bb = new BlockBattery();
+    public BlockBatteryCasing bb = new BlockBatteryCasing();
+    public Item bbi = new ItemBlock(bb).setRegistryName(bb.getRegistryName());
 
     public Betteries() {
         LogManager.getLogger(MODID).log(Level.INFO, "[Betteries] Created class Betteries");
@@ -29,7 +32,8 @@ public class Betteries {
     
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        GameRegistry.registerTileEntity(TileEntityBattery.class, "betteries_batttery");
+        GameRegistry.registerTileEntity(TileEntityBatteryCasing.class, "betteries_batttery");
+                
         LogManager.getLogger(MODID).log(Level.INFO, "[Betteries] Initialized");
     }
     
@@ -41,7 +45,10 @@ public class Betteries {
     
     @SubscribeEvent
     public void registerItems(RegistryEvent.Register<Item> event) {
-        event.getRegistry().register(new ItemBlock(bb).setRegistryName(bb.getRegistryName()));
+        event.getRegistry().register(bbi);
+        ModelLoader.setCustomModelResourceLocation(bbi, 0, new ModelResourceLocation(bb.getRegistryName(), "normal"));
+        ModelLoader.setCustomModelResourceLocation(bbi, 0, new ModelResourceLocation(bb.getRegistryName(), "inventory"));
         LogManager.getLogger(MODID).log(Level.INFO, "[Betteries] Registered items");
     }
+    
 }

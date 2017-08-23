@@ -11,13 +11,9 @@ import net.minecraftforge.energy.EnergyStorage;
  *
  * @author Ricky
  */
-public class TileEntityBattery extends TileEntityBatteryMultiblock implements ITickable {
+public class TileEntityBatteryCasing extends TileEntityBatteryMultiblock implements ITickable {
     
     EnergyStorage store = new EnergyStorage(10000);
-
-    public TileEntityBattery() {
-        store.receiveEnergy((int)(Math.random() * 1000), false);
-    }
     
     @Override
     public void update() {
