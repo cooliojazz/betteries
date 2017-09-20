@@ -1,1 +1,7 @@
-tile.battery.name=Battery
+tile.battery_casing.name=Battery Casing
+tile.battery_casing_2.name=Battery Casing Teir 2
+tile.battery_connector.name=Battery Connector
+tile.battery_controller.name=Battery Controller
+item.energy_bundle.name=Stable Energy Bundle
+item.compressed_redstone.name=Compressed Redstone Bundle
+item.stabalizer_ring.name=Stabalizer Ring

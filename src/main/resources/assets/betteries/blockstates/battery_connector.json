@@ -1,0 +1,19 @@
+{
+    "variants": {
+        "inventory": {
+            "model": "betteries:battery_connector_default"
+        },
+        "connected=false,output=false": {
+            "model": "betteries:battery_connector_default"
+        },
+        "connected=false,output=true": {
+            "model": "betteries:battery_connector_default"
+        },
+        "connected=true,output=false": {
+            "model": "betteries:battery_connector_input"
+        },
+        "connected=true,output=true": {
+            "model": "betteries:battery_connector_output"
+        }
+    }
+}
