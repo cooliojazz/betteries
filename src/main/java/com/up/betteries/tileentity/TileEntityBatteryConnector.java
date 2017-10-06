@@ -18,12 +18,14 @@ import net.minecraftforge.energy.IEnergyStorage;
 import ic2.api.energy.tile.IEnergySource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.energy.EnergyStorage;
+import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.fml.common.Optional;
 
 /**
  *
  * @author Ricky
  */
-public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock implements ITickable, IEnergySource, IEnergySink {
+public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock implements IEnergySource, IEnergySink {
 
     @Override
     public boolean hasCapability(Capability<?> cpblt, EnumFacing ef) {
@@ -58,12 +60,12 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
         return 200000;
     }
     
-    private boolean loaded = false;
+    private boolean ic2netreg = false;
     @Override
     public void update() {
-        if (!loaded) {
+        if (!ic2netreg && Loader.isModLoaded("ic2") && !world.isRemote) {
             MinecraftForge.EVENT_BUS.post(new EnergyTileLoadEvent(this));
-            loaded = true;
+            ic2netreg = true;
         }
         super.update();
         if (hasParent() && getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out)) {
@@ -126,13 +128,19 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
 
     @Override
     public void invalidate() {
-        MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+        if (ic2netreg) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            ic2netreg = false;
+        }
         super.invalidate();
     }
 
     @Override
     public void onChunkUnload() {
-        MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+        if (ic2netreg) {
+            MinecraftForge.EVENT_BUS.post(new EnergyTileUnloadEvent(this));
+            ic2netreg = false;
+        }
         super.onChunkUnload();
     }
     

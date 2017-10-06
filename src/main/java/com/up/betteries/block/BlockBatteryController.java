@@ -36,14 +36,21 @@ public class BlockBatteryController extends Block implements ITileEntityProvider
     public TileEntity createNewTileEntity(World world, int i) {
         return new TileEntityBatteryController();
     }
-
+    
     @Override
     public boolean onBlockActivated(World world, BlockPos bp, IBlockState bs, EntityPlayer ep, EnumHand hand, EnumFacing face, float f1, float f2, float f3) {
         if (!world.isRemote) {
             TileEntityBatteryController te = (TileEntityBatteryController)world.getTileEntity(bp);
             EnergyStorage es = te.getStore();
-            ep.sendMessage(new TextComponentString(es.getEnergyStored() / 1000 + "K / " + (es.getMaxEnergyStored() / 1000) + "K"));
+            ep.sendStatusMessage(new TextComponentString(abbreviateInteger(es.getEnergyStored()) + "RF / " + abbreviateInteger(es.getMaxEnergyStored()) + "RF"), true);
         }
         return true;
+    }
+
+    private final String[] abvs = {"", "k", "M", "G", "T", "P", "E"};
+    
+    private String abbreviateInteger(int i) {
+        int exp = Math.max(Math.min((int)(Math.log(i) / Math.log(1000)), abvs.length - 1), 0);
+        return String.format("%.2f", i / Math.pow(1000, exp)) + abvs[exp];
     }
 }

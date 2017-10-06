@@ -8,7 +8,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 public class BlockBatteryCasing extends BlockBatteryMultiblock implements ITileEntityProvider {
-
     
     public BlockBatteryCasing() {
         super(Material.IRON);
