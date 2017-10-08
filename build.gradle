@@ -38,10 +38,15 @@ repositories {
         name = "ic2"
         url = "http://maven.ic2.player.to/"
     }
+    maven {
+        name = "oc"
+        url = "http://maven.cil.li/"
+    }
 }
 
 dependencies {
     compile 'net.industrial-craft:industrialcraft-2:2.7.85-ex111:api'
+    provided "li.cil.oc:OpenComputers:MC1.11.2-1.7.0.+:api"
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"

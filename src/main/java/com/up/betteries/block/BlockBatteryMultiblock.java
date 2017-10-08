@@ -1,6 +1,5 @@
 package com.up.betteries.block;
 
-import com.up.betteries.Betteries;
 import com.up.betteries.tileentity.TileEntityBatteryController;
 import com.up.betteries.tileentity.TileEntityBatteryMultiblock;
 import net.minecraft.block.Block;
@@ -13,8 +12,6 @@ import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 /**
  *

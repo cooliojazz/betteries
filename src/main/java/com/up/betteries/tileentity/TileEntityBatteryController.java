@@ -1,16 +1,15 @@
 package com.up.betteries.tileentity;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.energy.EnergyStorage;
 
 /**
  *
  * @author Ricky
  */
-public class TileEntityBatteryController extends TileEntity {
+public class TileEntityBatteryController extends TileEntityBatteryBase {
     
-    public int capacity = 1000000;
+    public int capacity = 2500000;
     private EnergyStorage store = new EnergyStorage(capacity);
 
     @Override

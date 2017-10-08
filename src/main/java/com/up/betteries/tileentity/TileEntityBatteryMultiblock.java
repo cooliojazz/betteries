@@ -3,8 +3,6 @@ package com.up.betteries.tileentity;
 import java.util.ArrayList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -14,7 +12,7 @@ import net.minecraft.util.math.BlockPos;
  *
  * @author Ricky
  */
-public abstract class TileEntityBatteryMultiblock extends TileEntity implements ITickable {
+public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase implements ITickable {
     
     private BlockPos parentpos = null;
 
@@ -30,6 +28,7 @@ public abstract class TileEntityBatteryMultiblock extends TileEntity implements 
             setParentPos(new BlockPos(nbttc.getInteger("px"), nbttc.getInteger("py"), nbttc.getInteger("pz")));
         }
 //        if (getWorld() != null) getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
+//        if (getWorld() != null && getWorld().isRemote) getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
     }
     
     @Override
@@ -44,7 +43,7 @@ public abstract class TileEntityBatteryMultiblock extends TileEntity implements 
     }
     
     public boolean hasParent() {
-        return parentpos != null;
+        return parentpos != null && getWorld().getTileEntity(parentpos) != null;
     }
     
     public boolean findParent() {
@@ -129,32 +128,12 @@ public abstract class TileEntityBatteryMultiblock extends TileEntity implements 
             if (getWorld() != null) getWorld().notifyBlockUpdate(getPos(), state, getWorld().getBlockState(getPos()), 0);
         }
     }
-
-    @Override
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        return new SPacketUpdateTileEntity(pos, 0, getUpdateTag());
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        readFromNBT(pkt.getNbtCompound());
-    }
     
     @Override
     public void update() {
-        if (hasParent() && getWorld().getTileEntity(parentpos) == null) {
+        if (!hasParent() && parentpos != null) {
             setParentPos(null);
         }
-    }
-
-    @Override
-    public void handleUpdateTag(NBTTagCompound tag) {
-        readFromNBT(tag);
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag() {
-        return writeToNBT(new NBTTagCompound());
     }
     
     public abstract int getStorageCapacity();

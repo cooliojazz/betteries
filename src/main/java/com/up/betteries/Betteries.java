@@ -62,8 +62,6 @@ public class Betteries {
         GameRegistry.registerTileEntity(TileEntityBatteryComputerConnector.class, "betteries_battery_computer_connector");
          
         registerRecipies();
-        
-//        LogManager.getLogger(MODID).log(Level.INFO, "[Betteries] Initialized");
     }
     
     public void registerRecipies() {
@@ -71,7 +69,7 @@ public class Betteries {
         GameRegistry.addShapedRecipe(new ItemStack(sri), "IOI", "ORO", "IOI", 'I', Item.getByNameOrId("minecraft:iron_ingot"), 'O', Item.getByNameOrId("minecraft:obsidian"), 'R', Item.getByNameOrId("minecraft:redstone_block"));
         GameRegistry.addShapedRecipe(new ItemStack(sebi, 4), " R ", "RBR", " R ", 'B', crbi, 'R', sri);
         GameRegistry.addShapedRecipe(new ItemStack(bbcai), "IRI", "RBR", "IRI", 'I', Item.getByNameOrId("minecraft:iron_ingot"), 'B', sebi, 'R', Item.getByNameOrId("minecraft:redstone"));
-        GameRegistry.addShapedRecipe(new ItemStack(bbcai2), "CRC", "RBR", "CRC", 'C', crbi, 'B', sebi, 'R', Item.getByNameOrId("minecraft:redstone"));
+        GameRegistry.addShapedRecipe(new ItemStack(bbcai2), "B B", " C ", "B B", 'C', bbcai, 'B', crbi);
         GameRegistry.addShapedRecipe(new ItemStack(bbcoi), "GRG", "RCR", "GRG", 'C', bbcai, 'R', Item.getByNameOrId("minecraft:redstone"), 'G', Item.getByNameOrId("minecraft:gold_ingot"));
         GameRegistry.addShapedRecipe(new ItemStack(bbcci), " R ", "RCR", " R ", 'C', bbcai, 'R', Item.getByNameOrId("opencomputers:cable"));
         GameRegistry.addShapedRecipe(new ItemStack(bbcti), "CRC", "RDR", "CRC", 'C', bbcai, 'D', Item.getByNameOrId("minecraft:diamond"), 'R', Item.getByNameOrId("minecraft:redstone"));
@@ -84,7 +82,6 @@ public class Betteries {
         event.getRegistry().register(bbco);
         event.getRegistry().register(bbct);
         event.getRegistry().register(bbcc);
-//        LogManager.getLogger(MODID).log(Level.INFO, "[Betteries] Registered blocks");
     }
     
     @SubscribeEvent

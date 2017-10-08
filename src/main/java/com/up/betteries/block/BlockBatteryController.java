@@ -24,11 +24,11 @@ public class BlockBatteryController extends Block implements ITileEntityProvider
     public BlockBatteryController() {
         super(Material.IRON);
 	isBlockContainer = true;
+	setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
+	setLightOpacity(0);
 	setHardness(1.5f);
 	setResistance(10.f);
-	setLightOpacity(0);
         setUnlocalizedName("battery_controller");
-	setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         setRegistryName("betteries", "battery_controller");
     }
 

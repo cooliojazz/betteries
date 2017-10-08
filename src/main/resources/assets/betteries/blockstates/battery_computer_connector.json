@@ -1,0 +1,27 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "textures": {
+            "all": "betteries:block/battery_computer_connector"
+        },
+        "model": "cube_all"
+    },
+    "variants": {
+        "normal": {
+            "model": "cube_all"
+        },
+        "connected": {
+            "false": {
+                "model": "cube_all"
+            },
+            "true": {
+                "textures": {
+                    "all": "betteries:block/battery_computer_connector_connected"
+                }
+            }
+        },
+        "inventory": {
+            "model": "cube_all"
+        }
+    }
+}
