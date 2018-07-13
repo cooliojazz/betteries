@@ -1,8 +1,13 @@
+tile.reinforced_obsidian.name=Reinforced Obsidian
 tile.battery_casing.name=Battery Casing
 tile.battery_casing_2.name=Battery Casing Tier 2
+tile.battery_casing_3.name=Battery Casing Tier 3
 tile.battery_connector.name=Battery Connector
 tile.battery_controller.name=Battery Controller
 tile.battery_computer_connector.name=Battery Computer Connector
-item.energy_bundle.name=Stable Energy Bundle
 item.compressed_redstone.name=Compressed Redstone Bundle
-item.stabalizer_ring.name=Stabilizer Ring
+item.stabilizer_ring.name=Stabilizer Ring
+item.energy_bundle.name=Stable Energy Bundle
+item.super_stabilizer_ring.name=Super Stabilizer Ring
+item.super_energy_bundle.name=Super Stable Energy Bundle
+itemGroup.betteries=Betteries

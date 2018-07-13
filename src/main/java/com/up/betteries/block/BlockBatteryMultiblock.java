@@ -7,6 +7,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCache;
 import net.minecraft.world.IBlockAccess;
@@ -17,12 +18,12 @@ import net.minecraft.world.chunk.Chunk;
  *
  * @author Ricky
  */
-public class BlockBatteryMultiblock extends Block {
+public abstract class BlockBatteryMultiblock extends BlockBatteryBase {
 
-    static PropertyBool con = PropertyBool.create("connected");
+    public static PropertyBool con = PropertyBool.create("connected");
     
-    public BlockBatteryMultiblock(Material p_i45394_1_) {
-        super(p_i45394_1_);
+    public BlockBatteryMultiblock(Material mat) {
+        super(mat);
         setDefaultState(getDefaultState().withProperty(con, false));
     }
     
@@ -35,9 +36,14 @@ public class BlockBatteryMultiblock extends Block {
     
     @Override
     public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos neighbor) {
-        if (!world.isRemote && world.getTileEntity(neighbor) instanceof TileEntityBatteryController) {
+        TileEntity entity = world.getTileEntity(neighbor);
+        if (!world.isRemote && entity instanceof TileEntityBatteryController) {
             TileEntityBatteryMultiblock te = ((TileEntityBatteryMultiblock)world.getTileEntity(pos));
-            te.findParent();
+            if (!te.hasParent()) te.findParent();
+        }
+        if (!world.isRemote && entity == null) {
+            TileEntityBatteryMultiblock te = ((TileEntityBatteryMultiblock)world.getTileEntity(pos));
+            te.neigborUpdateCheck();
         }
     }
     
@@ -70,6 +76,10 @@ public class BlockBatteryMultiblock extends Block {
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)(world instanceof ChunkCache ? ((ChunkCache)world).getTileEntity(pos, Chunk.EnumCreateEntityType.CHECK) : world.getTileEntity(pos));
-        return state.withProperty(con, te.hasParent());
+        return state.withProperty(con, te != null ? te.hasParent() : false);
     }
+
+    @Override
+    public abstract TileEntityBatteryMultiblock createNewTileEntity(World world, int i);
+    
 }

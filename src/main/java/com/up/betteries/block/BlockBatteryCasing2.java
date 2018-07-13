@@ -1,17 +1,16 @@
 package com.up.betteries.block;
 
+import com.up.betteries.Betteries;
 import com.up.betteries.tileentity.TileEntityBatteryCasing2;
-import net.minecraft.block.ITileEntityProvider;
+import com.up.betteries.tileentity.TileEntityBatteryMultiblock;
 import net.minecraft.block.material.Material;
-import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 /**
  *
  * @author Ricky
  */
-public class BlockBatteryCasing2 extends BlockBatteryMultiblock implements ITileEntityProvider {
+public class BlockBatteryCasing2 extends BlockBatteryMultiblock {
 
     
     public BlockBatteryCasing2() {
@@ -21,12 +20,12 @@ public class BlockBatteryCasing2 extends BlockBatteryMultiblock implements ITile
 	setResistance(10.f);
 	setLightOpacity(0);
         setUnlocalizedName("battery_casing_2");
-	setCreativeTab(CreativeTabs.BUILDING_BLOCKS);
         setRegistryName("betteries", "battery_casing_2");
+	setCreativeTab(Betteries.betteriesTab);
     }
 
     @Override
-    public TileEntity createNewTileEntity(World world, int i) {
+    public TileEntityBatteryMultiblock createNewTileEntity(World world, int i) {
         TileEntityBatteryCasing2 te = new TileEntityBatteryCasing2();
         te.setWorld(world);
         return te;

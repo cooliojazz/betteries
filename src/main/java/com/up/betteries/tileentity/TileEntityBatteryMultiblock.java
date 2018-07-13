@@ -1,7 +1,6 @@
 package com.up.betteries.tileentity;
 
 import java.util.ArrayList;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -26,9 +25,9 @@ public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase 
         super.readFromNBT(nbttc);
         if (nbttc.getBoolean("child")) {
             setParentPos(new BlockPos(nbttc.getInteger("px"), nbttc.getInteger("py"), nbttc.getInteger("pz")));
+        } else {
+            setParentPos(null);
         }
-//        if (getWorld() != null) getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
-//        if (getWorld() != null && getWorld().isRemote) getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
     }
     
     @Override
@@ -46,43 +45,98 @@ public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase 
         return parentpos != null && getWorld().getTileEntity(parentpos) != null;
     }
     
-    public boolean findParent() {
-        return findParent(new ArrayList<TileEntityBatteryMultiblock>(), new ArrayList<TileEntityBatteryMultiblock>());
-    }
-    
-    private boolean findParent(ArrayList<TileEntityBatteryMultiblock> callers, ArrayList<TileEntityBatteryMultiblock> ncallers) {
-        if (!hasParent()) {
-            ArrayList<TileEntityBatteryController> parents = new ArrayList<TileEntityBatteryController>();
-            callers.add(this);
-            for (EnumFacing dir : EnumFacing.values()) {
-                TileEntity nx = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
-                if (nx instanceof TileEntityBatteryMultiblock) {
-                    TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)nx;
-                    if (!callers.contains(te)) parents.add(te.getParent(callers, ncallers));
-                } else if (nx instanceof TileEntityBatteryController) {
-                    parents.add((TileEntityBatteryController)nx);
-                }
-            }
-            callers.remove(this);
-            for (TileEntityBatteryController te : parents) {
-                if (te != null) {
-                    te.addThisToChild(this);
-                    notifyNeighbors(ncallers);
-                    return true;
-                }
+    public boolean hasAdjacentBatteryEntity() {
+        for (EnumFacing dir : EnumFacing.values()) {
+            TileEntity nx = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
+            if (nx instanceof TileEntityBatteryMultiblock || nx instanceof TileEntityBatteryController) {
+                return true;
             }
         }
         return false;
     }
     
-    private void notifyNeighbors(ArrayList<TileEntityBatteryMultiblock> callers) {
+    public boolean findParent() {
+        TileEntityBatteryController parent = null;
+        for (EnumFacing dir : EnumFacing.values()) {
+            TileEntity nt = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
+            if (nt instanceof TileEntityBatteryMultiblock) {
+                TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)nt;
+                if (te.getParent() != null) {
+                    parent = te.getParent();
+                    break;
+                }
+            } else if (nt instanceof TileEntityBatteryController) {
+                parent = (TileEntityBatteryController)nt;
+                break;
+            }
+        }
+        if (parent != null) {
+            parent.addThisToChild(this);
+            notifyNeighbors(parent);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    private boolean isParentRemoved() {
+        ArrayList<TileEntityBatteryMultiblock> toCheck = new ArrayList<>();
+        ArrayList<TileEntityBatteryMultiblock> checked = new ArrayList<>();
+        toCheck.add(this);
+        boolean noParent = true;
+        while (toCheck.size() > 0 && noParent) {
+            TileEntityBatteryMultiblock cur = toCheck.get(toCheck.size() - 1);
+            for (EnumFacing dir : EnumFacing.values()) {
+                TileEntity nt = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
+                if (nt instanceof TileEntityBatteryMultiblock) {
+                    TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)nt;
+                    if (!toCheck.contains(te) && !checked.contains(te)) {
+                        toCheck.add(te);
+                    }
+                } else if (nt instanceof TileEntityBatteryController) {
+                    noParent = false;
+                    break;
+                }
+            }
+            toCheck.remove(cur);
+            checked.add(cur);
+        }
+        return noParent;
+    }
+    
+    private void notifyNeighbors(TileEntityBatteryController parent) {
+        notifyNeighbors(new ArrayList<>(), parent);
+    }
+    
+    private void notifyNeighbors(ArrayList<TileEntityBatteryMultiblock> callers, TileEntityBatteryController parent) {
         callers.add(this);
         for (EnumFacing dir : EnumFacing.values()) {
-            TileEntity nx = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
-            if (nx instanceof TileEntityBatteryMultiblock) {
-                TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)nx;
+            TileEntity nt = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
+            if (nt instanceof TileEntityBatteryMultiblock) {
+                TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)nt;
                 if (!te.hasParent() && !callers.contains(te)) {
-                    te.findParent(new ArrayList<TileEntityBatteryMultiblock>(), callers);
+                    parent.addThisToChild(te);
+                    te.notifyNeighbors(callers, parent);
+                }
+            }
+        }
+        callers.remove(this);
+    }
+    
+    private void notifyNeighborsRemoved() {
+        notifyNeighborsRemoved(new ArrayList<>());
+    }
+    
+    private void notifyNeighborsRemoved(ArrayList<TileEntityBatteryMultiblock> callers) {
+        callers.add(this);
+        for (EnumFacing dir : EnumFacing.values()) {
+            TileEntity nt = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
+            if (nt instanceof TileEntityBatteryMultiblock) {
+                TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)nt;
+                if (te.hasParent() && !callers.contains(te)) {
+                    te.getParent().removeChild(te);
+                    te.setParentPos(null);
+                    te.notifyNeighborsRemoved(callers);
                 }
             }
         }
@@ -90,30 +144,7 @@ public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase 
     }
     
     public TileEntityBatteryController getParent() {
-        return getParent(new ArrayList<TileEntityBatteryMultiblock>(), new ArrayList<TileEntityBatteryMultiblock>());
-    }
-    
-    private TileEntityBatteryController getParent(ArrayList<TileEntityBatteryMultiblock> callers, ArrayList<TileEntityBatteryMultiblock> ncallers) {
-        TileEntityBatteryController parent;
-        if (hasParent()) {
-            TileEntityBatteryController te = (TileEntityBatteryController)getWorld().getTileEntity(parentpos);
-            if (te == null) {
-                if (findParent(callers, ncallers)) {
-                    parent = (TileEntityBatteryController)getWorld().getTileEntity(parentpos);
-                } else {
-                    parent = null;
-                }
-            } else {
-                parent = te;
-            }
-        } else {
-            if (findParent(callers, ncallers)) {
-                parent = (TileEntityBatteryController)getWorld().getTileEntity(parentpos);
-            } else {
-                parent = null;
-            }
-        }
-        return parent;
+        return parentpos == null ? null : (TileEntityBatteryController)getWorld().getTileEntity(parentpos);
     }
     
     public void setParent(TileEntityBatteryController parent) {
@@ -122,16 +153,33 @@ public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase 
     
     public void setParentPos(BlockPos pos) {
         if (pos == null ? parentpos != null : !pos.equals(parentpos)) {
-            IBlockState state = null;
-            if (getWorld() != null) state = getWorld().getBlockState(getPos());
             parentpos = pos;
-            if (getWorld() != null) getWorld().notifyBlockUpdate(getPos(), state, getWorld().getBlockState(getPos()), 0);
+            if (getWorld() != null) {
+                markDirty();
+//                getWorld().notifyBlockUpdate(getPos(), getWorld().getBlockState(getPos()), getWorld().getBlockState(getPos()), 2);
+//                getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
+            }
+        }
+    }
+    
+    public void neigborUpdateCheck() {
+        if (hasParent()) {
+            if (!hasAdjacentBatteryEntity()) {
+                getParent().removeChild(this);
+                setParentPos(null);
+            } else {
+                if (isParentRemoved()) {
+                    getParent().removeChild(this);
+                    setParentPos(null);
+                    notifyNeighborsRemoved();
+                }
+            }
         }
     }
     
     @Override
     public void update() {
-        if (!hasParent() && parentpos != null) {
+        if (parentpos != null && getWorld().getTileEntity(parentpos) == null && !getWorld().isRemote) {
             setParentPos(null);
         }
     }

@@ -15,7 +15,7 @@ public class TileEntityBatteryComputerConnector extends TileEntityBatteryMultibl
 
     @Override
     public int getStorageCapacity() {
-        return 250000;
+        return 100000;
     }
 
     @Override

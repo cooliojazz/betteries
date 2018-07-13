@@ -4,11 +4,11 @@ package com.up.betteries.tileentity;
  *
  * @author Ricky
  */
-public class TileEntityBatteryCasing extends TileEntityBatteryMultiblock {
+public class TileEntityBatteryCasing3 extends TileEntityBatteryMultiblock {
 
     @Override
     public int getStorageCapacity() {
-        return 200000;
+        return 20000000;
     }
     
 }
