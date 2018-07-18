@@ -156,8 +156,6 @@ public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase 
             parentpos = pos;
             if (getWorld() != null) {
                 markDirty();
-//                getWorld().notifyBlockUpdate(getPos(), getWorld().getBlockState(getPos()), getWorld().getBlockState(getPos()), 2);
-//                getWorld().markBlockRangeForRenderUpdate(getPos(), getPos());
             }
         }
     }
@@ -179,7 +177,7 @@ public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase 
     
     @Override
     public void update() {
-        if (parentpos != null && getWorld().getTileEntity(parentpos) == null && !getWorld().isRemote) {
+        if (!getWorld().isRemote && parentpos != null && getWorld().getTileEntity(parentpos) == null) {
             setParentPos(null);
         }
     }
