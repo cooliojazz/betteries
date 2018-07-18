@@ -1,9 +1,6 @@
 package com.up.betteries.tileentity;
 
-import com.up.betteries.item.ItemEnergyBundle;
 import com.up.betteries.item.ItemEnergyStorage;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -20,21 +17,28 @@ import net.minecraftforge.items.ItemStackHandler;
  * @author Ricky
  */
 public class TileEntityBatteryController extends TileEntityBatteryBase implements ITickable {
+
+    private static final int BASE_CAPACITY = 1000000;
     
     public class BatteryEnergyStorage extends EnergyStorage {
 
+        private static final int BASE_TRANSFER = 10000;
         private static final int TRANSFER_LIMIT = 1000000;
         
-        public BatteryEnergyStorage(int capacity) {
-            super(capacity);
+        public BatteryEnergyStorage(long capacity) {
+            this(capacity, 0);
         }
         
-        public BatteryEnergyStorage(int capacity, int energy) {
+        public BatteryEnergyStorage(long capacity, int energy) {
+            this(capacity > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)capacity, energy);
+        }
+        
+        private BatteryEnergyStorage(int capacity, int energy) {
             super(capacity, capacity, capacity, energy);
         }
         
         public int getMaxTransfer() {
-            return (int)(TRANSFER_LIMIT / (1 + Math.exp(-(getMaxEnergyStored() - 1000000) / 200000000.0)) - TRANSFER_LIMIT / 2) + 10000;
+            return (int)(TRANSFER_LIMIT / 2 / (1 + Math.exp(-(TileEntityBatteryController.this.capacity - (double)BASE_CAPACITY) / Integer.MAX_VALUE)) - TRANSFER_LIMIT) + BASE_TRANSFER;
         }
         
         @Override
@@ -69,7 +73,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         
     }
     
-    public int capacity = 1000000;
+    public long capacity = BASE_CAPACITY;
     private EnergyStorage store = new BatteryEnergyStorage(capacity);
     private ItemStackHandler inv = new ItemStackHandler(2) {
         
@@ -127,7 +131,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     @Override
     public void readFromNBT(NBTTagCompound nbttc) {
         super.readFromNBT(nbttc);
-        capacity = nbttc.getInteger("capacity");
+        capacity = nbttc.getLong("capacity");
         store = new BatteryEnergyStorage(capacity, nbttc.getInteger("energy"));
         if (nbttc.hasKey("items")) {
             inv.deserializeNBT(nbttc.getCompoundTag("items"));
@@ -137,7 +141,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbttc) {
         nbttc.setInteger("energy", store.getEnergyStored());
-        nbttc.setInteger("capacity", capacity);
+        nbttc.setLong("capacity", capacity);
         nbttc.setTag("items", inv.serializeNBT());
         return super.writeToNBT(nbttc);
     }

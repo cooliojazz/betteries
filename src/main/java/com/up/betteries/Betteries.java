@@ -105,7 +105,7 @@ public class Betteries {
     public Item ssri = new ItemSuperStabilizerRing();
     public Item ssebi = new ItemSuperEnergyBundle();
         
-    @SidedProxy(clientSide = "com.up.betteries.DumbProxyClient", serverSide = "com.up.betteries.DumbProxyServer")
+    @SidedProxy(clientSide = "com.up.betteries.BetteriesProxyClient", serverSide = "com.up.betteries.BetteriesProxyServer")
     public static BetteriesProxy proxy;
 
     public Betteries() {
