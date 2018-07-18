@@ -87,7 +87,7 @@ public abstract class TileEntityBatteryMultiblock extends TileEntityBatteryBase 
         while (toCheck.size() > 0 && noParent) {
             TileEntityBatteryMultiblock cur = toCheck.get(toCheck.size() - 1);
             for (EnumFacing dir : EnumFacing.values()) {
-                TileEntity nt = getWorld().getTileEntity(getPos().add(dir.getDirectionVec()));
+                TileEntity nt = getWorld().getTileEntity(cur.getPos().add(dir.getDirectionVec()));
                 if (nt instanceof TileEntityBatteryMultiblock) {
                     TileEntityBatteryMultiblock te = (TileEntityBatteryMultiblock)nt;
                     if (!toCheck.contains(te) && !checked.contains(te)) {

@@ -7,7 +7,7 @@ import net.minecraft.item.Item;
  *
  * @author Ricky
  */
-public class DumbProxyServer implements DumbProxy {
+public class BetteriesProxyServer implements BetteriesProxy {
 
     @Override
     public void registerModels(ArrayList<Item> items) {

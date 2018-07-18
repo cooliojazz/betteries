@@ -9,7 +9,7 @@ import net.minecraftforge.client.model.ModelLoader;
  *
  * @author Ricky
  */
-public class DumbProxyClient implements DumbProxy {
+public class BetteriesProxyClient implements BetteriesProxy {
 
     @Override
     public void registerModels(ArrayList<Item> items) {
