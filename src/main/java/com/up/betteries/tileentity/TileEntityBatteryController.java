@@ -38,7 +38,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         }
         
         public int getMaxTransfer() {
-            return (int)(TRANSFER_LIMIT / 2 / (1 + Math.exp(-(TileEntityBatteryController.this.capacity - (double)BASE_CAPACITY) / Integer.MAX_VALUE)) - TRANSFER_LIMIT) + BASE_TRANSFER;
+            return (int)(TRANSFER_LIMIT * 2 / (1 + Math.exp(-(TileEntityBatteryController.this.capacity - (double)BASE_CAPACITY) / Integer.MAX_VALUE)) - TRANSFER_LIMIT) + BASE_TRANSFER;
         }
         
         @Override
