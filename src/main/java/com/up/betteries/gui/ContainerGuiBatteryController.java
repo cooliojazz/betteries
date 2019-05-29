@@ -42,10 +42,12 @@ public class ContainerGuiBatteryController extends GuiContainer {
         drawRect(barx, bary, barx + (int)((long)te.getStore().getEnergyStored() * barw / te.getStore().getMaxEnergyStored()), bary + barh, Color.red.getRGB());
         this.fontRenderer.drawString(abbreviateInteger(te.getStore().getEnergyStored()) + "/" + abbreviateInteger(te.getStore().getMaxEnergyStored()) + " FE", barx, bary - 15, 4210752);
         if (mouseX - guiLeft > barx && mouseY - guiTop > bary && mouseX - guiLeft < barx + barw && mouseY - guiTop < bary + barh) {
+            double txtotal = te.getStore().getAverageIn() - te.getStore().getAverageOut();
             drawHoveringText(Arrays.asList(new String[] {
                 te.getStore().getEnergyStored() * 100l / te.getStore().getMaxEnergyStored() + "%",
-                abbreviateInteger(((TileEntityBatteryController.BatteryEnergyStorage)te.getStore()).getMaxTransfer()) + "/t max",
-//                abbreviateInteger(te.getAverageIn()) + "/t in | " + abbreviateInteger(te.getAverageIn()) + "/t out"
+                abbreviateInteger(te.getStore().getMaxTransfer()) + "/t max",
+                te.getStore().getAverageIn() + "/t in | " + te.getStore().getAverageOut() + "/t out (average/1s)",
+                txtotal < 0 ? suffixTime(Math.round(te.getStore().getEnergyStored() / Math.abs(txtotal))) + " until empty" : (txtotal == 0 ? "<==>" : suffixTime(Math.round((te.getStore().getMaxEnergyStored() - te.getStore().getEnergyStored()) / txtotal)) + " until full")
             }), mouseX - guiLeft, mouseY - guiTop);
         }
     }
@@ -55,6 +57,18 @@ public class ContainerGuiBatteryController extends GuiContainer {
     public static String abbreviateInteger(int i) {
         int exp = Math.max(Math.min((int)(Math.log(i) / Math.log(1000)), abvs.length - 1), 0);
         return String.format("%.2f", i / Math.pow(1000, exp)) + abvs[exp];
+    }
+    
+    public static String suffixTime(long t) {
+        long s = t /20;
+        if (s < 10) return t + "t";
+        long m = s / 60;
+        if (m < 2) return s + "s";
+        long h = m / 60;
+        if (h < 2) return m + "m";
+        long d = h / 24;
+        if (h < 2) return d + "d";
+        return h + "h";
     }
     
     @Override

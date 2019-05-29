@@ -17,9 +17,9 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
-import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional;
+import com.up.betteries.tileentity.TileEntityBatteryController.BatteryEnergyStorage;
 
 /**
  *
@@ -31,13 +31,14 @@ import net.minecraftforge.fml.common.Optional;
 @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")
 public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock implements IEnergySource, IEnergySink, IMjReceiver, IMjPassiveProvider {
 
+//    private PrintStream sout = new PrintStream(new FileOutputStream(FileDescriptor.out));
     
     @Override
     public int getStorageCapacity() {
         return 100000;
     }
     
-    private EnergyStorage getParentStorage() {
+    private BatteryEnergyStorage getParentStorage() {
         if (hasParent()) {
             return getParent().getStore();
         } else {
@@ -67,8 +68,8 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
                     if (Loader.isModLoaded("buildcraftenergy") && nt.hasCapability(MjAPI.CAP_RECEIVER, dir.getOpposite())) {
                         IMjReceiver recv = (IMjReceiver)nt.getCapability(MjAPI.CAP_RECEIVER, dir.getOpposite());
                         if (recv.canReceive()) {
-                            long req = Math.min(recv.getPowerRequested(), getParent().getStore().getEnergyStored() * MjAPI.MJ);
-                            getParent().getStore().extractEnergy((int)((req - recv.receivePower(req, false)) / MjAPI.MJ), false);
+                            long req = Math.min(recv.getPowerRequested(), getParent().getStore().getEnergyStored() / BUILDCRAFT_RATIO * MjAPI.MJ);
+                            getParent().getStore().extractEnergy((int)(req - recv.receivePower(req, false) / MjAPI.MJ) * BUILDCRAFT_RATIO, false);
                         }
                     }
                 }
@@ -81,9 +82,7 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     @Override
     public boolean hasCapability(Capability<?> cpblt, EnumFacing ef) {
         if (hasParent()) {
-            if (cpblt == CapabilityEnergy.ENERGY && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out)) {
-                return true;
-            }
+            if (cpblt == CapabilityEnergy.ENERGY) return true;
         }
         return super.hasCapability(cpblt, ef);
     }
@@ -91,8 +90,8 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     @Override
     public <T> T getCapability(Capability<T> cpblt, EnumFacing ef) {
         if (cpblt == CapabilityEnergy.ENERGY) {
-            if (hasParent() && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out)) {
-                return (T)getParent().getStore();
+            if (hasParent()) {
+                return (T)(getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? getParent().getOutputStore() : getParent().getInputStore());
             }
         }
         if ((cpblt == MjAPI.CAP_CONNECTOR || cpblt == MjAPI.CAP_RECEIVER) && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out)) {
@@ -111,12 +110,12 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     
     @Override
     public double getOfferedEnergy() {
-        return hasParent() && getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(512, getParentStorage().getEnergyStored() / 4.0) : 0;
+        return hasParent() && getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, getParentStorage().getEnergyStored() / 4.0) : 0;
     }
 
     @Override
     public double getDemandedEnergy() {
-        return hasParent() && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? 512 : 0;
+        return hasParent() && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, (getParentStorage().getMaxEnergyStored() - getParentStorage().getEnergyStored()) / 4.0) : 0;
     }
 
     @Override
@@ -131,12 +130,12 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
 
     @Override
     public int getSourceTier() {
-        return 3;
+        return 4;
     }
 
     @Override
     public int getSinkTier() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -169,15 +168,16 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
 
     
     //Buildcraft
+    public static int BUILDCRAFT_RATIO = 100;
     
     @Override
     public long getPowerRequested() {
-        return Math.min(1024, getParentStorage().getMaxEnergyStored() - getParentStorage().getEnergyStored()) * MjAPI.MJ / 10;
+        return Math.min(getParentStorage().getMaxTransfer(), getParentStorage().getMaxEnergyStored() - getParentStorage().getEnergyStored()) * MjAPI.MJ / BUILDCRAFT_RATIO;
     }
 
     @Override
     public long receivePower(long microJoules, boolean simulate) {
-        return getParentStorage().receiveEnergy((int)(microJoules / MjAPI.MJ) * 10, simulate);
+        return getParentStorage().receiveEnergy((int)(microJoules * BUILDCRAFT_RATIO / MjAPI.MJ), simulate);
     }
 
     @Override
@@ -193,10 +193,10 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     //Unused? Even with being a "passive provider", buildcraft still seems to need you to push energy to other blocks yourself
     @Override
     public long extractPower(long min, long max, boolean simulate) {
-        long amount = getParentStorage().extractEnergy((int)(max / MjAPI.MJ) * 10, simulate) * MjAPI.MJ / 10;
+        long amount = getParentStorage().extractEnergy((int)(max * BUILDCRAFT_RATIO / MjAPI.MJ), simulate) * MjAPI.MJ / BUILDCRAFT_RATIO;
         if (amount < min) {
             amount = 0;
-            getParentStorage().receiveEnergy((int)(amount / MjAPI.MJ) * 10, simulate);
+            getParentStorage().receiveEnergy((int)(amount * BUILDCRAFT_RATIO / MjAPI.MJ), simulate);
         }
         return amount;
     }

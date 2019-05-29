@@ -1,6 +1,10 @@
 package com.up.betteries.tileentity;
 
 import com.up.betteries.item.ItemEnergyStorage;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -19,10 +23,95 @@ import net.minecraftforge.items.ItemStackHandler;
 public class TileEntityBatteryController extends TileEntityBatteryBase implements ITickable {
 
     private static final int BASE_CAPACITY = 1000000;
+    public static final int AVERAGE_LENGTH = 20;
+    
+    public class InputBatteryEnergyStorage extends EnergyStorage {
+        
+        private BatteryEnergyStorage store;
+
+        public InputBatteryEnergyStorage(BatteryEnergyStorage store) {
+            super(store.getMaxEnergyStored());
+            this.store = store;
+        }
+
+        @Override
+        public boolean canExtract() {
+            return false;
+        }
+        
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return 0;
+        }
+        
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            return store.receiveEnergy(maxReceive, simulate);
+        }
+        
+    }
+    
+    public class OutputBatteryEnergyStorage extends EnergyStorage {
+        
+        private BatteryEnergyStorage store;
+
+        public OutputBatteryEnergyStorage(BatteryEnergyStorage store) {
+            super(store.getMaxEnergyStored());
+            this.store = store;
+        }
+
+        @Override
+        public boolean canReceive() {
+            return false;
+        }
+        
+        @Override
+        public int receiveEnergy(int maxReceive, boolean simulate) {
+            return 0;
+        }
+        
+        @Override
+        public int extractEnergy(int maxExtract, boolean simulate) {
+            return store.receiveEnergy(maxReceive, simulate);
+        }
+        
+    }
     
     public class BatteryEnergyStorage extends EnergyStorage {
+        
+        private class SlidingAverage {
+            
+            private ArrayList<Integer> bucket = new ArrayList<>();
+            private LinkedList<Integer> old = new LinkedList<>();
 
-        private static final int BASE_TRANSFER = 10000;
+            public SlidingAverage(int max) {
+                for (int i = 0; i < max; i++) old.push(0);
+            }
+            
+            public SlidingAverage(LinkedList<Integer> old) {
+                this.old = old;
+            }
+
+            public void push(Integer e) {
+                bucket.add(e);
+            }
+            
+            public void next() {
+                old.push((int)bucket.stream().collect(Collectors.summingInt(i -> i)));
+                bucket = new ArrayList<>();
+                old.removeLast();
+            }
+            
+            public double getAverage() {
+                return old.stream().collect(Collectors.averagingInt(i -> i));
+            }
+        }
+
+        private SlidingAverage out = new SlidingAverage(AVERAGE_LENGTH);
+        private SlidingAverage in = new SlidingAverage(AVERAGE_LENGTH);
+        
+        
+        private static final int BASE_TRANSFER = 1000;
         private static final int TRANSFER_LIMIT = 1000000;
         
         public BatteryEnergyStorage(long capacity) {
@@ -41,6 +130,14 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
             return (int)(TRANSFER_LIMIT * 2 / (1 + Math.exp(-(TileEntityBatteryController.this.capacity - (double)BASE_CAPACITY) / Integer.MAX_VALUE)) - TRANSFER_LIMIT) + BASE_TRANSFER;
         }
         
+        public double getAverageOut() {
+            return out.getAverage();
+        }
+        
+        public double getAverageIn() {
+            return in.getAverage();
+        }
+        
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
             int oldRS = getRedstoneLevel();
@@ -51,8 +148,8 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
                 } else {
                     markDirty();
                 }
+                out.push(ret);
             }
-//            lastout += ret;
             return ret;
         }
 
@@ -66,15 +163,15 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
                 } else {
                     markDirty();
                 }
+                in.push(ret);
             }
-//            lastin += ret;
             return ret;
         }
         
     }
     
     public long capacity = BASE_CAPACITY;
-    private EnergyStorage store = new BatteryEnergyStorage(capacity);
+    private BatteryEnergyStorage store = new BatteryEnergyStorage(capacity);
     private ItemStackHandler inv = new ItemStackHandler(2) {
         
         @Override
@@ -84,7 +181,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         
         @Override
         public ItemStack insertItem(int slot, ItemStack is, boolean simulate) {
-            if (is.getItem() instanceof ItemEnergyStorage && getStackInSlot(slot).isEmpty()) {
+            if (is.hasCapability(CapabilityEnergy.ENERGY, null) && getStackInSlot(slot).isEmpty()) {
                 return super.insertItem(slot, is, simulate);
             }
             return is;
@@ -97,42 +194,13 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         
     };
     
-    //This would all have to be synced to the client as well to show in the gui, im not sure how to do that efficiently...
-    
-//    private class FixedArrayList<E> extends ArrayList<E> {
-//        int length;
-//
-//        public FixedArrayList(int length) {
-//            super(length);
-//            this.length = length;
-//        }
-//        
-//        @Override
-//        public boolean add(E e) {
-//            if (size() > length) remove(0);
-//            return super.add(e);
-//        }
-//        
-//    }
-//
-//    private int lastin = 0;
-//    private int lastout = 0;
-//    private ArrayList<Integer> ins = new FixedArrayList<>(20);
-//    private ArrayList<Integer> outs = new FixedArrayList<>(20);
-//
-//    public int getAverageIn() {
-//        return (int)(double)ins.stream().collect(Collectors.averagingInt(i -> i));
-//    }
-//    
-//    public int getAverageOut() {
-//        return (int)(double)outs.stream().collect(Collectors.averagingInt(i -> i));
-//    }
-    
     @Override
     public void readFromNBT(NBTTagCompound nbttc) {
         super.readFromNBT(nbttc);
         capacity = nbttc.getLong("capacity");
         store = new BatteryEnergyStorage(capacity, nbttc.getInteger("energy"));
+        store.in.old = new LinkedList<>(IntStream.of(nbttc.getIntArray("ins").length >= AVERAGE_LENGTH ? nbttc.getIntArray("ins") : new int[AVERAGE_LENGTH]).mapToObj(i -> i).limit(AVERAGE_LENGTH).collect(Collectors.toList()));
+        store.out.old = new LinkedList<>(IntStream.of(nbttc.getIntArray("outs").length >= AVERAGE_LENGTH ? nbttc.getIntArray("outs") : new int[AVERAGE_LENGTH]).mapToObj(i -> i).limit(AVERAGE_LENGTH).collect(Collectors.toList()));
         if (nbttc.hasKey("items")) {
             inv.deserializeNBT(nbttc.getCompoundTag("items"));
         }
@@ -141,6 +209,8 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbttc) {
         nbttc.setInteger("energy", store.getEnergyStored());
+        nbttc.setIntArray("ins", store.in.old.stream().mapToInt(i -> i).toArray());
+        nbttc.setIntArray("outs", store.out.old.stream().mapToInt(i -> i).toArray());
         nbttc.setLong("capacity", capacity);
         nbttc.setTag("items", inv.serializeNBT());
         return super.writeToNBT(nbttc);
@@ -163,8 +233,16 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         markDirty(false, true);
     }
 
-    public EnergyStorage getStore() {
+    public BatteryEnergyStorage getStore() {
         return store;
+    }
+
+    public InputBatteryEnergyStorage getInputStore() {
+        return new InputBatteryEnergyStorage(store);
+    }
+
+    public OutputBatteryEnergyStorage getOutputStore() {
+        return new OutputBatteryEnergyStorage(store);
     }
     
     public int getRedstoneLevel() {
@@ -185,10 +263,10 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
 
     @Override
     public void update() {
-//        ins.add(lastin);
-//        outs.add(lastout);
-//        lastin = 0;
-//        lastout = 0;
+        if (!getWorld().isRemote) {
+            store.in.next();
+            store.out.next();
+        }
         
         ItemStack in = inv.getStackInSlot(0);
         ItemStack out = inv.getStackInSlot(1);

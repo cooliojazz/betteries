@@ -7,7 +7,7 @@ import li.cil.oc.api.network.SimpleComponent;
 import net.minecraftforge.fml.common.Optional;
 
 /**
- *
+ * NOTE: Errors on injection only in decomp environment
  * @author Ricky
  */
 @Optional.Interface(iface = "li.cil.oc.api.network.SimpleComponent", modid = "opencomputers")

@@ -8,11 +8,12 @@ buildscript {
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
+
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.1"
-group = "com.up.betteries" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+version = "1.2"
+group = "com.up.betteries"
 archivesBaseName = "betteries"
 
 sourceCompatibility = targetCompatibility = "1.8" // Need this here so eclipse task generates correctly.
@@ -21,7 +22,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.4.2730"
+    version = "1.12.2-14.23.5.2837"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -49,9 +50,9 @@ repositories {
 }
 
 dependencies {
-    deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.91-ex112:api'
+    deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.148-ex112:api'
     deobfProvided "com.mod-buildcraft:buildcraft-api:7.99.+"
-    provided "li.cil.oc:OpenComputers:MC1.12.2-1.7.2.+:api"
+    provided "li.cil.oc:OpenComputers:MC1.12.2-1.7.4.+:api"
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
     //compile "some.group:artifact:version:classifier"

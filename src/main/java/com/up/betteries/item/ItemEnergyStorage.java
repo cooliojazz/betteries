@@ -13,10 +13,13 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 /**
  *
@@ -33,6 +36,7 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
         setHasSubtypes(false);
     }
 
+    @SideOnly(Side.CLIENT)
     @Override
     public void addInformation(ItemStack is, World world, List<String> list, ITooltipFlag itf) {
         super.addInformation(is, world, list, itf);
@@ -54,8 +58,22 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
     public ICapabilityProvider initCapabilities(ItemStack is, NBTTagCompound nbttc) {
         return new EnergyCapabilityProvider(new EnergyStorage(capacity, capacity / 100));
     }
+
+//    @Override
+//    public NBTTagCompound getNBTShareTag(ItemStack is) {
+//        NBTTagCompound nbt = super.getNBTShareTag(is);
+//        new EnergyCapabilityProvider(is.getCapability(CapabilityEnergy.ENERGY, null)).serializeNBT(nbt);
+//        return nbt;
+//    }
+//
+//    @Override
+//    public void readNBTShareTag(ItemStack is, NBTTagCompound nbttc) {
+//        super.readNBTShareTag(is, nbttc);
+//        new EnergyCapabilityProvider(is.getCapability(CapabilityEnergy.ENERGY, null)).deserializeNBT(nbttc);
+//    }
     
-    public static class EnergyCapabilityProvider implements ICapabilityProvider, INBTSerializable<NBTBase> {
+    
+    public static class EnergyCapabilityProvider implements ICapabilityProvider, ICapabilitySerializable<NBTBase> {
             
         EnergyStorage store;
 
