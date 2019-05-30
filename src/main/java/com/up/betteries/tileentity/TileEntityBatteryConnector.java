@@ -106,26 +106,27 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     
     //IC2
     
+    public static double IC2_RATIO = 4;
     private boolean ic2netreg = false;
     
     @Override
     public double getOfferedEnergy() {
-        return hasParent() && getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, getParentStorage().getEnergyStored() / 4.0) : 0;
+        return hasParent() && getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, getParentStorage().getEnergyStored() / IC2_RATIO) : 0;
     }
 
     @Override
     public double getDemandedEnergy() {
-        return hasParent() && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, (getParentStorage().getMaxEnergyStored() - getParentStorage().getEnergyStored()) / 4.0) : 0;
+        return hasParent() && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, (getParentStorage().getMaxEnergyStored() - getParentStorage().getEnergyStored()) / IC2_RATIO) : 0;
     }
 
     @Override
     public void drawEnergy(double amount) {
-        getParentStorage().extractEnergy((int)amount * 4, false);
+        getParentStorage().extractEnergy((int)(amount * IC2_RATIO), false);
     }
 
     @Override
     public double injectEnergy(EnumFacing directionFrom, double amount, double voltage) {
-        return amount - getParentStorage().receiveEnergy((int)amount * 4, false) / 4.0;
+        return amount - getParentStorage().receiveEnergy((int)(amount * IC2_RATIO), false) / IC2_RATIO;
     }
 
     @Override
