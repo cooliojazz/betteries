@@ -59,21 +59,23 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
         return new EnergyCapabilityProvider(new EnergyStorage(capacity, capacity / 100));
     }
 
-//    @Override
-//    public NBTTagCompound getNBTShareTag(ItemStack is) {
-//        NBTTagCompound nbt = super.getNBTShareTag(is);
-//        new EnergyCapabilityProvider(is.getCapability(CapabilityEnergy.ENERGY, null)).serializeNBT(nbt);
-//        return nbt;
-//    }
-//
-//    @Override
-//    public void readNBTShareTag(ItemStack is, NBTTagCompound nbttc) {
-//        super.readNBTShareTag(is, nbttc);
-//        new EnergyCapabilityProvider(is.getCapability(CapabilityEnergy.ENERGY, null)).deserializeNBT(nbttc);
-//    }
+    @Override
+    public NBTTagCompound getNBTShareTag(ItemStack is) {
+        NBTTagCompound nbt = super.getNBTShareTag(is);
+        if (nbt == null) nbt = new NBTTagCompound();
+        EnergyStorage store = (EnergyStorage)is.getCapability(CapabilityEnergy.ENERGY, null);
+        if (store != null) nbt.setTag("store", new EnergyCapabilityProvider(store).serializeNBT());
+        return nbt;
+    }
+
+    @Override
+    public void readNBTShareTag(ItemStack is, NBTTagCompound nbttc) {
+        super.readNBTShareTag(is, nbttc);
+        EnergyStorage store = (EnergyStorage)is.getCapability(CapabilityEnergy.ENERGY, null);
+        if (nbttc == null && store != null) new EnergyCapabilityProvider(store).deserializeNBT(nbttc.getTag("store"));
+    }
     
-    
-    public static class EnergyCapabilityProvider implements ICapabilityProvider, ICapabilitySerializable<NBTBase> {
+    public static class EnergyCapabilityProvider implements ICapabilitySerializable<NBTBase> {
             
         EnergyStorage store;
 
