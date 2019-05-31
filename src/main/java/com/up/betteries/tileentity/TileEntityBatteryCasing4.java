@@ -8,7 +8,7 @@ public class TileEntityBatteryCasing4 extends TileEntityBatteryMultiblock {
 
     @Override
     public int getStorageCapacity() {
-        return 200000000;
+        return 1000000000;
     }
     
 }

@@ -9,7 +9,7 @@ import com.up.betteries.Betteries;
 public class ItemEnergyBundle extends ItemEnergyStorage {
 
     public ItemEnergyBundle() {
-        super(100000);
+        super(500000);
         setRegistryName(Betteries.MODID, "energy_bundle");
         setUnlocalizedName("energy_bundle");
     }

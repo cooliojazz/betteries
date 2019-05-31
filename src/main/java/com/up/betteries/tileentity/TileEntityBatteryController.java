@@ -1,5 +1,6 @@
 package com.up.betteries.tileentity;
 
+import com.up.betteries.energy.LongEnergyStorage;
 import com.up.betteries.item.ItemEnergyStorage;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -22,7 +23,7 @@ import net.minecraftforge.items.ItemStackHandler;
  */
 public class TileEntityBatteryController extends TileEntityBatteryBase implements ITickable {
 
-    private static final int BASE_CAPACITY = 1000000;
+    private static final int BASE_CAPACITY = 2000000;
     public static final int AVERAGE_LENGTH = 20;
     
     public class InputBatteryEnergyStorage extends EnergyStorage {
@@ -77,7 +78,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         
     }
     
-    public class BatteryEnergyStorage extends EnergyStorage {
+    public class BatteryEnergyStorage extends LongEnergyStorage {
         
         private class SlidingAverage {
             
@@ -112,18 +113,14 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         
         
         private static final int BASE_TRANSFER = 1000;
-        private static final int TRANSFER_LIMIT = 1000000;
+        private static final int TRANSFER_LIMIT = 10000000;
         
         public BatteryEnergyStorage(long capacity) {
-            this(capacity, 0);
+            super(capacity);
         }
         
-        public BatteryEnergyStorage(long capacity, int energy) {
-            this(capacity > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)capacity, energy);
-        }
-        
-        private BatteryEnergyStorage(int capacity, int energy) {
-            super(capacity, capacity, capacity, energy);
+        public BatteryEnergyStorage(long capacity, long energy) {
+            super(capacity, safeDowncast(capacity), safeDowncast(capacity), energy);
         }
         
         public int getMaxTransfer() {
@@ -140,6 +137,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         
         @Override
         public int extractEnergy(int maxExtract, boolean simulate) {
+            if (maxExtract < 0) maxExtract = Integer.MAX_VALUE;
             int oldRS = getRedstoneLevel();
             int ret = super.extractEnergy(Math.min(maxExtract, getMaxTransfer()), simulate);
             if (!simulate) {
@@ -155,6 +153,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
 
         @Override
         public int receiveEnergy(int maxReceive, boolean simulate) {
+            if (maxReceive < 0) maxReceive = Integer.MAX_VALUE;
             int oldRS = getRedstoneLevel();
             int ret = super.receiveEnergy(Math.min(maxReceive, getMaxTransfer()), simulate);
             if (!simulate) {
@@ -198,7 +197,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     public void readFromNBT(NBTTagCompound nbttc) {
         super.readFromNBT(nbttc);
         capacity = nbttc.getLong("capacity");
-        store = new BatteryEnergyStorage(capacity, nbttc.getInteger("energy"));
+        store = new BatteryEnergyStorage(capacity, nbttc.getLong("energy"));
         store.in.old = new LinkedList<>(IntStream.of(nbttc.getIntArray("ins").length >= AVERAGE_LENGTH ? nbttc.getIntArray("ins") : new int[AVERAGE_LENGTH]).mapToObj(i -> i).limit(AVERAGE_LENGTH).collect(Collectors.toList()));
         store.out.old = new LinkedList<>(IntStream.of(nbttc.getIntArray("outs").length >= AVERAGE_LENGTH ? nbttc.getIntArray("outs") : new int[AVERAGE_LENGTH]).mapToObj(i -> i).limit(AVERAGE_LENGTH).collect(Collectors.toList()));
         if (nbttc.hasKey("items")) {
@@ -208,7 +207,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound nbttc) {
-        nbttc.setInteger("energy", store.getEnergyStored());
+        nbttc.setLong("energy", store.getRealEnergyStored());
         nbttc.setIntArray("ins", store.in.old.stream().mapToInt(i -> i).toArray());
         nbttc.setIntArray("outs", store.out.old.stream().mapToInt(i -> i).toArray());
         nbttc.setLong("capacity", capacity);
@@ -228,7 +227,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     }
     
     private void updateStorageSize() {
-        int e = store.getEnergyStored();
+        long e = store.getRealEnergyStored();
         store = new BatteryEnergyStorage(capacity, e);
         markDirty(false, true);
     }
@@ -246,7 +245,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     }
     
     public int getRedstoneLevel() {
-        return getStore().getEnergyStored() * 16 / getStore().getMaxEnergyStored();
+        return (int)(getStore().getRealEnergyStored() * 16 / getStore().getRealMaxEnergyStored());
     }
 
     @Override
@@ -273,13 +272,13 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         if (!in.isEmpty()) {
             IEnergyStorage store = in.getCapability(CapabilityEnergy.ENERGY, null);
             if (store.getEnergyStored() > 0) {
-                this.store.receiveEnergy(store.extractEnergy(Math.min(1024, this.store.getMaxEnergyStored() - this.store.getEnergyStored()), false), false);
+                this.store.receiveEnergy(store.extractEnergy(Math.min(this.store.getMaxTransfer(), this.store.getMaxEnergyStored() - this.store.getEnergyStored()), false), false);
             }
         }
         if (!out.isEmpty()) {
             IEnergyStorage store = out.getCapability(CapabilityEnergy.ENERGY, null);
             if (store.getEnergyStored() < store.getMaxEnergyStored() && this.store.getEnergyStored() > 0) {
-                store.receiveEnergy(this.store.extractEnergy(Math.min(1024, store.getMaxEnergyStored() - store.getEnergyStored()), false), false);
+                store.receiveEnergy(this.store.extractEnergy(Math.min(this.store.getMaxTransfer(), store.getMaxEnergyStored() - store.getEnergyStored()), false), false);
             }
         }
     }

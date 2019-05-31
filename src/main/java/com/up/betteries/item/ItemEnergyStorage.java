@@ -40,7 +40,7 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
     @Override
     public void addInformation(ItemStack is, World world, List<String> list, ITooltipFlag itf) {
         super.addInformation(is, world, list, itf);
-        if (isDamaged(is)) list.add(ContainerGuiBatteryController.abbreviateInteger(is.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored()) + " FE Stored");
+        if (isDamaged(is)) list.add(ContainerGuiBatteryController.abbreviate(is.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored()) + " FE Stored");
     }
     
     @Override
@@ -51,7 +51,7 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
     @Override
     public int getDamage(ItemStack stack) {
         IEnergyStorage store = stack.getCapability(CapabilityEnergy.ENERGY, null);
-        return (store.getMaxEnergyStored() - store.getEnergyStored()) * 100 / store.getMaxEnergyStored();
+        return (store.getMaxEnergyStored() - store.getEnergyStored()) / store.getMaxEnergyStored() * 100;
     }
 
     @Override
@@ -72,7 +72,10 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
     public void readNBTShareTag(ItemStack is, NBTTagCompound nbttc) {
         super.readNBTShareTag(is, nbttc);
         EnergyStorage store = (EnergyStorage)is.getCapability(CapabilityEnergy.ENERGY, null);
-        if (nbttc == null && store != null) new EnergyCapabilityProvider(store).deserializeNBT(nbttc.getTag("store"));
+        if (nbttc != null && store != null) {
+//            if (store == null) return new 
+            new EnergyCapabilityProvider(store).deserializeNBT(nbttc.getTag("store"));
+        }
     }
     
     public static class EnergyCapabilityProvider implements ICapabilitySerializable<NBTBase> {

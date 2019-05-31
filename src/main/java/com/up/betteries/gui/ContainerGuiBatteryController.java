@@ -39,22 +39,26 @@ public class ContainerGuiBatteryController extends GuiContainer {
         int barh = 25;
         drawRect(barx - 2, bary - 2, barx + barw + 2, bary + barh + 2, Color.darkGray.darker().getRGB());
         drawRect(barx, bary, barx + barw, bary + 25, Color.black.getRGB());
-        drawRect(barx, bary, barx + (int)((long)te.getStore().getEnergyStored() * barw / te.getStore().getMaxEnergyStored()), bary + barh, Color.red.getRGB());
-        this.fontRenderer.drawString(abbreviateInteger(te.getStore().getEnergyStored()) + "/" + abbreviateInteger(te.getStore().getMaxEnergyStored()) + " FE", barx, bary - 15, 4210752);
+        drawRect(barx, bary, barx + (int)(te.getStore().getRealEnergyStored() * barw / te.getStore().getRealMaxEnergyStored()), bary + barh, Color.red.getRGB());
+        this.fontRenderer.drawString(abbreviate(te.getStore().getRealEnergyStored()) + " / " + abbreviate(te.getStore().getRealMaxEnergyStored()) + " FE", barx, bary - 15, 4210752);
         if (mouseX - guiLeft > barx && mouseY - guiTop > bary && mouseX - guiLeft < barx + barw && mouseY - guiTop < bary + barh) {
             double txtotal = te.getStore().getAverageIn() - te.getStore().getAverageOut();
             drawHoveringText(Arrays.asList(new String[] {
-                te.getStore().getEnergyStored() * 100l / te.getStore().getMaxEnergyStored() + "%",
-                abbreviateInteger(te.getStore().getMaxTransfer()) + "/t max",
+                te.getStore().getRealEnergyStored() * 100l / te.getStore().getRealMaxEnergyStored() + "%",
+                abbreviate(te.getStore().getMaxTransfer()) + "/t max",
                 te.getStore().getAverageIn() + "/t in | " + te.getStore().getAverageOut() + "/t out (average/1s)",
-                txtotal < 0 ? suffixTime(Math.round(te.getStore().getEnergyStored() / Math.abs(txtotal))) + " until empty" : (txtotal == 0 ? "<==>" : suffixTime(Math.round((te.getStore().getMaxEnergyStored() - te.getStore().getEnergyStored()) / txtotal)) + " until full")
+                txtotal < 0 ? suffixTime(Math.round(te.getStore().getRealEnergyStored() / Math.abs(txtotal))) + " until empty" : (txtotal == 0 ? "<==>" : suffixTime(Math.round((te.getStore().getRealMaxEnergyStored() - te.getStore().getRealEnergyStored()) / txtotal)) + " until full")
             }), mouseX - guiLeft, mouseY - guiTop);
         }
     }
 
-    private static final String[] abvs = {"", "k", "M", "G", "T", "P", "E"};
+    private static final String[] abvs = {"", "k", "M", "G", "T", "P", "E", "Z", "Y", "?"};
     
-    public static String abbreviateInteger(int i) {
+    public static String abbreviate(int i) {
+        int exp = Math.max(Math.min((int)(Math.log(i) / Math.log(1000)), abvs.length - 1), 0);
+        return String.format("%.2f", i / Math.pow(1000, exp)) + abvs[exp];
+    }
+    public static String abbreviate(long i) {
         int exp = Math.max(Math.min((int)(Math.log(i) / Math.log(1000)), abvs.length - 1), 0);
         return String.format("%.2f", i / Math.pow(1000, exp)) + abvs[exp];
     }

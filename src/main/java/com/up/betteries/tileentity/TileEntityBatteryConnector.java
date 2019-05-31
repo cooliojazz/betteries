@@ -35,7 +35,7 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     
     @Override
     public int getStorageCapacity() {
-        return 100000;
+        return 200000;
     }
     
     private BatteryEnergyStorage getParentStorage() {
@@ -68,7 +68,7 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
                     if (Loader.isModLoaded("buildcraftenergy") && nt.hasCapability(MjAPI.CAP_RECEIVER, dir.getOpposite())) {
                         IMjReceiver recv = (IMjReceiver)nt.getCapability(MjAPI.CAP_RECEIVER, dir.getOpposite());
                         if (recv.canReceive()) {
-                            long req = Math.min(recv.getPowerRequested(), getParent().getStore().getEnergyStored() / BUILDCRAFT_RATIO * MjAPI.MJ);
+                            long req = Math.min(recv.getPowerRequested(), getParent().getStore().getRealEnergyStored() / BUILDCRAFT_RATIO * MjAPI.MJ);
                             getParent().getStore().extractEnergy((int)(req - recv.receivePower(req, false) / MjAPI.MJ) * BUILDCRAFT_RATIO, false);
                         }
                     }
@@ -111,12 +111,12 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     
     @Override
     public double getOfferedEnergy() {
-        return hasParent() && getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, getParentStorage().getEnergyStored() / IC2_RATIO) : 0;
+        return hasParent() && getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, getParentStorage().getRealEnergyStored() / IC2_RATIO) : 0;
     }
 
     @Override
     public double getDemandedEnergy() {
-        return hasParent() && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, (getParentStorage().getMaxEnergyStored() - getParentStorage().getEnergyStored()) / IC2_RATIO) : 0;
+        return hasParent() && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? Math.min(2048, (getParentStorage().getRealMaxEnergyStored() - getParentStorage().getRealEnergyStored()) / IC2_RATIO) : 0;
     }
 
     @Override
@@ -173,7 +173,7 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     
     @Override
     public long getPowerRequested() {
-        return Math.min(getParentStorage().getMaxTransfer(), getParentStorage().getMaxEnergyStored() - getParentStorage().getEnergyStored()) * MjAPI.MJ / BUILDCRAFT_RATIO;
+        return Math.min(getParentStorage().getMaxTransfer(), getParentStorage().getRealMaxEnergyStored() - getParentStorage().getRealEnergyStored()) * MjAPI.MJ / BUILDCRAFT_RATIO;
     }
 
     @Override
