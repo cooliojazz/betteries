@@ -21,10 +21,12 @@ import com.up.betteries.item.ItemHyperEnergyBundle;
 import com.up.betteries.item.ItemHyperStabilizerRing;
 import com.up.betteries.item.ItemSuperEnergyBundle;
 import com.up.betteries.item.ItemSuperStabilizerRing;
+import com.up.betteries.item.energy.BatteryElectricItemManager;
 import com.up.betteries.tileentity.TileEntityBatteryCasing2;
 import com.up.betteries.tileentity.TileEntityBatteryCasing3;
 import com.up.betteries.tileentity.TileEntityBatteryCasing4;
 import com.up.betteries.tileentity.TileEntityBatteryComputerConnector;
+import ic2.api.item.ElectricItem;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.block.Block;
@@ -138,6 +140,11 @@ public class Betteries {
         registerRecipies();
         
         NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
+        
+        
+        if (Loader.isModLoaded("ic2")) {
+            ElectricItem.registerBackupManager(new BatteryElectricItemManager());
+        }
     }
     
     public void registerRecipies() {

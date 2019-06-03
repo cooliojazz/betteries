@@ -1,11 +1,9 @@
 package com.up.betteries.item;
 
-import com.up.betteries.Betteries;
 import com.up.betteries.gui.ContainerGuiBatteryController;
+import com.up.betteries.util.GuiUtils;
 import java.util.List;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -14,7 +12,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
 import net.minecraftforge.energy.IEnergyStorage;
@@ -40,7 +37,7 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
     @Override
     public void addInformation(ItemStack is, World world, List<String> list, ITooltipFlag itf) {
         super.addInformation(is, world, list, itf);
-        if (isDamaged(is)) list.add(ContainerGuiBatteryController.abbreviate(is.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored()) + " FE Stored");
+        if (isDamaged(is)) list.add(GuiUtils.abbreviate(is.getCapability(CapabilityEnergy.ENERGY, null).getEnergyStored()) + " FE Stored");
     }
     
     @Override
@@ -51,7 +48,7 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
     @Override
     public int getDamage(ItemStack stack) {
         IEnergyStorage store = stack.getCapability(CapabilityEnergy.ENERGY, null);
-        return (store.getMaxEnergyStored() - store.getEnergyStored()) / store.getMaxEnergyStored() * 100;
+        return (store.getMaxEnergyStored() - store.getEnergyStored()) * 100 / store.getMaxEnergyStored();
     }
 
     @Override
@@ -73,7 +70,6 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
         super.readNBTShareTag(is, nbttc);
         EnergyStorage store = (EnergyStorage)is.getCapability(CapabilityEnergy.ENERGY, null);
         if (nbttc != null && store != null) {
-//            if (store == null) return new 
             new EnergyCapabilityProvider(store).deserializeNBT(nbttc.getTag("store"));
         }
     }
@@ -107,4 +103,5 @@ public abstract class ItemEnergyStorage extends ItemCapacityText {
             CapabilityEnergy.ENERGY.readNBT(store, null, nbt);
         }
     }
+    
 }
