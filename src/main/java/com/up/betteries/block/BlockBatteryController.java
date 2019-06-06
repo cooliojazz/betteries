@@ -3,12 +3,17 @@ package com.up.betteries.block;
 import com.up.betteries.Betteries;
 import com.up.betteries.tileentity.TileEntityBatteryBase;
 import com.up.betteries.tileentity.TileEntityBatteryController;
+import java.util.List;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 /**
@@ -52,5 +57,17 @@ public class BlockBatteryController extends BlockBatteryBase {
         return te == null ? 0 : te.getRedstoneLevel();
     }
     
+    
+    @Override
+    public void breakBlock(World world, BlockPos bp, IBlockState bs) {
+        TileEntityBatteryController te = (TileEntityBatteryController)world.getTileEntity(bp);
+        for (int i = 0; i < 2; ++i) {
+            ItemStack itemstack = te.getInventory().getStackInSlot(i);
+            if (!itemstack.isEmpty()) {
+                InventoryHelper.spawnItemStack(world, bp.getX(), bp.getY(), bp.getZ(), itemstack);
+            }
+        }
+        super.breakBlock(world, bp, bs);
+    }
     
 }

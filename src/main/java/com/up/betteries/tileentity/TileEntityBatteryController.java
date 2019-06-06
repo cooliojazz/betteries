@@ -143,4 +143,8 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
             }
         }
     }
+    
+    public ItemStackHandler getInventory() {
+        return inv;
+    }
 }
