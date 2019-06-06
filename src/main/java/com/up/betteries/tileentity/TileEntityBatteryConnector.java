@@ -5,6 +5,7 @@ import buildcraft.api.mj.IMjPassiveProvider;
 import buildcraft.api.mj.IMjReceiver;
 import buildcraft.api.mj.MjAPI;
 import com.up.betteries.block.BlockBatteryConnector;
+import com.up.betteries.energy.BatteryEnergyStorage;
 import com.up.betteries.energy.Conversions;
 import ic2.api.energy.event.EnergyTileLoadEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
@@ -20,7 +21,6 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional;
-import com.up.betteries.tileentity.TileEntityBatteryController.BatteryEnergyStorage;
 
 /**
  *
@@ -31,8 +31,6 @@ import com.up.betteries.tileentity.TileEntityBatteryController.BatteryEnergyStor
 @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySource", modid = "ic2")
 @Optional.Interface(iface = "ic2.api.energy.tile.IEnergySink", modid = "ic2")
 public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock implements IEnergySource, IEnergySink, IMjReceiver, IMjPassiveProvider {
-
-//    private PrintStream sout = new PrintStream(new FileOutputStream(FileDescriptor.out));
     
     @Override
     public int getStorageCapacity() {
@@ -92,7 +90,7 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     public <T> T getCapability(Capability<T> cpblt, EnumFacing ef) {
         if (cpblt == CapabilityEnergy.ENERGY) {
             if (hasParent()) {
-                return (T)(getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? getParent().getOutputStore() : getParent().getInputStore());
+                return (T)(getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out) ? getParent().getStore().getOutputView() : getParent().getStore().getInputView());
             }
         }
         if ((cpblt == MjAPI.CAP_CONNECTOR || cpblt == MjAPI.CAP_RECEIVER) && !getBlockType().getStateFromMeta(getBlockMetadata()).getValue(BlockBatteryConnector.out)) {
