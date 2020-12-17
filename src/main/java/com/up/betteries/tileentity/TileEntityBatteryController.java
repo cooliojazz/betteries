@@ -29,6 +29,7 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     
     public long capacity = BASE_CAPACITY;
     private BatteryEnergyStorage store = new BatteryEnergyStorage(this, capacity);
+    private boolean updated = false;
     private final ItemStackHandler inv = new ItemStackHandler(2) {
         
         @Override
@@ -114,7 +115,18 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
     }
 
     @Override
+    public void markDirty() {
+        super.markDirty();
+        updated = true;
+    }
+    
+    public boolean updatedThisTick() {
+        return updated;
+    }
+
+    @Override
     public void update() {
+        updated = false;
         if (!getWorld().isRemote) {
             store.getHistoryIn().next();
             store.getHistoryOut().next();
@@ -125,21 +137,21 @@ public class TileEntityBatteryController extends TileEntityBatteryBase implement
         if (!in.isEmpty()) {
             IEnergyStorage istore = in.getCapability(CapabilityEnergy.ENERGY, null);
             if (istore != null && istore.getEnergyStored() > 0) {
-                this.store.receiveEnergy(istore.extractEnergy(Math.min(this.store.getMaxTransfer(), this.store.getMaxEnergyStored() - this.store.getEnergyStored()), false), false);
+                store.receiveEnergy(istore.extractEnergy(Math.min(store.getMaxTransfer(), store.getMaxEnergyStored() - store.getEnergyStored()), false), false);
             }
             if (Loader.isModLoaded("ic2") && in.getItem() instanceof IElectricItem) {
-                double discharge = ElectricItem.manager.discharge(in, Math.min(this.store.getMaxTransfer(), this.store.getMaxEnergyStored() - this.store.getEnergyStored()) / Conversions.IC2_RATIO, 4, false, true, false) * Conversions.IC2_RATIO;
-                this.store.receiveEnergy((int)discharge, false);
+                double discharge = ElectricItem.manager.discharge(in, Math.min(store.getMaxTransfer(), store.getMaxEnergyStored() - store.getEnergyStored()) / Conversions.IC2_RATIO, 4, false, true, false) * Conversions.IC2_RATIO;
+                store.receiveEnergy((int)discharge, false);
             }
         }
         if (!out.isEmpty()) {
             IEnergyStorage istore = out.getCapability(CapabilityEnergy.ENERGY, null);
-            if (istore != null && istore.getEnergyStored() < istore.getMaxEnergyStored() && this.store.getEnergyStored() > 0) {
-                istore.receiveEnergy(this.store.extractEnergy(Math.min(this.store.getMaxTransfer(), istore.getMaxEnergyStored() - istore.getEnergyStored()), false), false);
+            if (istore != null && istore.getEnergyStored() < istore.getMaxEnergyStored() && store.getEnergyStored() > 0) {
+                store.extractEnergy(istore.receiveEnergy(Math.min(store.getMaxTransfer(), store.getEnergyStored()), false), false);
             }
             if (Loader.isModLoaded("ic2") && out.getItem() instanceof IElectricItem) {
-                double charge = ElectricItem.manager.charge(out, Math.min(this.store.getMaxTransfer(), this.store.getEnergyStored()) / Conversions.IC2_RATIO, 4, false, false) * Conversions.IC2_RATIO;
-                this.store.extractEnergy((int)charge, false);
+                double charge = ElectricItem.manager.charge(out, Math.min(store.getMaxTransfer(), store.getEnergyStored()) / Conversions.IC2_RATIO, 4, false, false) * Conversions.IC2_RATIO;
+                store.extractEnergy((int)charge, false);
             }
         }
     }

@@ -1,14 +1,13 @@
 buildscript {
     repositories {
         jcenter()
-        maven { url = "http://files.minecraftforge.net/maven" }
+        maven { url = "https://files.minecraftforge.net/maven" }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
-
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
@@ -22,7 +21,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2837"
+    version = "1.12.2-14.23.5.2847"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -49,7 +48,15 @@ repositories {
     }
 }
 
+configurations {
+    embed
+    compile.extendsFrom(embed)
+}
+
 dependencies {
+//    // This should be a bad idea I think, only for a modpack without ic2 to not have to figure out the correct method to not load their api
+//    embed 'net.industrial-craft:industrialcraft-2:2.8.148-ex112:api'
+//    embed "com.mod-buildcraft:buildcraft-api:7.99.+"
     compile 'net.industrial-craft:industrialcraft-2:2.8.148-ex112:api'
 //    deobfCompile 'net.industrial-craft:industrialcraft-2:2.8.148-ex112:api'
     deobfProvided "com.mod-buildcraft:buildcraft-api:7.99.+"
@@ -75,6 +82,10 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
+}
+
+jar {
+    from configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
 }
 
 processResources {

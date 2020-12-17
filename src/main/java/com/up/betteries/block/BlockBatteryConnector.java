@@ -38,8 +38,8 @@ public class BlockBatteryConnector extends BlockBatteryMultiblock {
         if (!world.isRemote) {
             world.setBlockState(bp, bs.withProperty(out, !bs.getValue(out)).getActualState(world, bp));
             world.markBlockRangeForRenderUpdate(bp, bp);
+            ep.sendStatusMessage(new TextComponentString(world.getBlockState(bp).getValue(out) ? "Output" : "Input"), true);
         }
-        ep.sendStatusMessage(new TextComponentString(world.getBlockState(bp).getValue(out) ? "Output" : "Input"), true);
         return true;
     }
     
@@ -63,6 +63,20 @@ public class BlockBatteryConnector extends BlockBatteryMultiblock {
     @Override
     public int getMetaFromState(IBlockState state) {
         return state.getValue(out) ? 1 : 0;
+    }
+
+    @Override
+    public boolean hasComparatorInputOverride(IBlockState state) {
+        return state.getValue(out);
+    }
+
+    @Override
+    public int getComparatorInputOverride(IBlockState state, World world, BlockPos pos) {
+        if (state.getValue(out)) {
+            TileEntityBatteryConnector te = (TileEntityBatteryConnector)world.getTileEntity(pos);
+            return te != null ? (te.hasParent() ? te.getParent().getRedstoneLevel() : 0) : 0;
+        }
+        return -1;
     }
 
 }

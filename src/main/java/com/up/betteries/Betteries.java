@@ -150,20 +150,23 @@ public class Betteries {
     public void registerRecipies() {
         ItemStack lapis = new ItemStack(Item.getByNameOrId("minecraft:dye"), 1, 4);
         
-        GameRegistry.addShapedRecipe(new ResourceLocation(MODID, crbi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(crbi), "RRR", "RRR", "RRR", 'R', Item.getByNameOrId("minecraft:redstone_block"));
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, sri.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(sri), "IOI", "ORO", "IOI", 'I', Item.getByNameOrId("minecraft:iron_ingot"), 'O', Item.getByNameOrId("minecraft:obsidian"), 'R', Item.getByNameOrId("minecraft:redstone_block"));
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, ssri.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(ssri), "DOD", "ORO", "DOD", 'D', Item.getByNameOrId("minecraft:diamond"), 'O', broi, 'R', sri);
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, hsri.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(hsri), "ONO", "ERE", "ONO", 'N', Item.getByNameOrId("minecraft:nether_star"), 'E', Item.getByNameOrId("minecraft:end_crystal"), 'O', bhroi, 'R', ssri);
+        
+        GameRegistry.addShapedRecipe(new ResourceLocation(MODID, crbi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(crbi), "RRR", "RRR", "RRR", 'R', Item.getByNameOrId("minecraft:redstone_block"));
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, sebi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(sebi, 4), "SLS", "RBR", "SLS", 'B', crbi, 'S', sri, 'R', Item.getByNameOrId("minecraft:redstone"), 'L', lapis);
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, ssebi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(ssebi, 4), "SLS", "BRB", "SLS", 'B', Item.getByNameOrId("minecraft:redstone_block"), 'R', sebi, 'S', ssri, 'L', Item.getByNameOrId("minecraft:lapis_block"));
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, hsebi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(hsebi, 4), "SDS", "BRB", "SDS", 'R', ssebi, 'B', crbi, 'S', hsri, 'D', Item.getByNameOrId("minecraft:diamond_block"));
         
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, broi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(broi), "OIO", "IOI", "OIO", 'I', Item.getByNameOrId("minecraft:iron_bars"), 'O', Item.getByNameOrId("minecraft:obsidian"));
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bhroi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bhroi), "OIO", "IDI", "OIO", 'I', Item.getByNameOrId("minecraft:iron_ingot"), 'D', Item.getByNameOrId("minecraft:diamond"), 'O', broi);
-        GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbcai.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbcai, 4), "ILI", "RBR", "ILI", 'I', Item.getByNameOrId("minecraft:iron_ingot"), 'B', sebi, 'R', Item.getByNameOrId("minecraft:redstone"), 'L', lapis);
+        
+        GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbcai.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbcai, 4), "ILI", "RBR", "ILI", 'I', Item.getByNameOrId("minecraft:iron_ingot"), 'B', crbi, 'R', Item.getByNameOrId("minecraft:redstone"), 'L', lapis);
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbca2i.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbca2i, 4), "OCO", "CBC", "OCO", 'C', bbcai, 'B', sebi, 'O', Item.getByNameOrId("minecraft:obsidian"));
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbca3i.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbca3i, 4), "OCO", "CSC", "OCO", 'C', bbca2i, 'S', ssebi, 'O', broi);
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbca4i.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbca4i, 4), "OCO", "CHC", "OCO", 'C', bbca3i, 'H', hsebi, 'O', bhroi);
+        
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbcoi.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbcoi), "GRG", "RCR", "GRG", 'C', bbcai, 'R', Item.getByNameOrId("minecraft:redstone"), 'G', Item.getByNameOrId("minecraft:gold_ingot"));
         GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbcti.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbcti), "CRC", "EOL", "CDC", 'C', bbcai, 'O', broi, 'D', Item.getByNameOrId("minecraft:diamond"), 'R', Item.getByNameOrId("minecraft:redstone_block"), 'L', Item.getByNameOrId("minecraft:lapis_block"), 'E', Item.getByNameOrId("minecraft:emerald"));
         if (Loader.isModLoaded("opencomputers")) GameRegistry.addShapedRecipe(new ResourceLocation(MODID, bbcci.getUnlocalizedName()), new ResourceLocation(MODID), new ItemStack(bbcci), " R ", "RCR", " R ", 'C', bbcai, 'R', Item.getByNameOrId("opencomputers:cable"));

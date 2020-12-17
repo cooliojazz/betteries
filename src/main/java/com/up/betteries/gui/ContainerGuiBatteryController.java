@@ -5,6 +5,8 @@ import com.up.betteries.tileentity.TileEntityBatteryController;
 import com.up.betteries.util.GuiUtils;
 import java.awt.Color;
 import java.util.Arrays;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.util.ResourceLocation;
 
@@ -17,7 +19,9 @@ public class ContainerGuiBatteryController extends GuiContainer {
     private static final ResourceLocation background = new ResourceLocation(Betteries.MODID, "textures/gui/battery_controller.png");
     
     private TileEntityBatteryController te;
-
+//    private Minecraft mc = Minecraft.getMinecraft();
+//    private FontRenderer unicodeRenderer = new FontRenderer(mc.gameSettings, new ResourceLocation("textures/font/ascii.png"), mc.renderEngine, true);
+    
     public ContainerGuiBatteryController(TileEntityBatteryController te, ContainerBatteryController container) {
         super(container);
 
@@ -48,7 +52,7 @@ public class ContainerGuiBatteryController extends GuiContainer {
             drawHoveringText(Arrays.asList(new String[] {
                 String.format("%.2f%%", (te.getStore().getRealEnergyStored() * 10000 / te.getStore().getRealMaxEnergyStored()) / 100.0),
                 GuiUtils.abbreviate(te.getStore().getMaxTransfer()) + "/t max",
-                te.getStore().getAverageIn() + "/t in | " + te.getStore().getAverageOut() + "/t out (average/1s)",
+                GuiUtils.abbreviate(te.getStore().getAverageIn()) + "/t " + (char)0xbb + " " + GuiUtils.abbreviate(te.getStore().getAverageOut()) + "/t (average over last second)",
                 txtotal < 0 ? GuiUtils.suffixTime(Math.round(te.getStore().getRealEnergyStored() / Math.abs(txtotal))) + " until empty" : (txtotal == 0 ? "<==>" : GuiUtils.suffixTime(Math.round((te.getStore().getRealMaxEnergyStored() - te.getStore().getRealEnergyStored()) / txtotal)) + " until full")
             }), mouseX - guiLeft, mouseY - guiTop);
         }

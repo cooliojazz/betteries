@@ -37,12 +37,12 @@ public class LongEnergyStorage implements IEnergyStorage {
     }
 
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
+    public int receiveEnergy(int receive, boolean simulate) {
         if (!canReceive()) {
             return 0;
         }
         
-        int energyReceived = safeDowncast(Math.min(realCapacity - realEnergy, Math.min(maxReceive, maxReceive)));
+        int energyReceived = safeDowncast(Math.min(realCapacity - realEnergy, Math.min(receive, maxReceive)));
         if (!simulate) {
             realEnergy += energyReceived;
             energy = safeDowncast(realEnergy);
@@ -51,12 +51,12 @@ public class LongEnergyStorage implements IEnergyStorage {
     }
 
     @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
+    public int extractEnergy(int extract, boolean simulate) {
         if (!canExtract()) {
             return 0;
         }
 
-        int energyExtracted = safeDowncast(Math.min(realEnergy, Math.min(maxExtract, maxExtract)));
+        int energyExtracted = safeDowncast(Math.min(realEnergy, Math.min(extract, maxExtract)));
         if (!simulate) {
             realEnergy -= energyExtracted;
             energy = safeDowncast(realEnergy);

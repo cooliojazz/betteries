@@ -59,8 +59,8 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
                     //Forge Energy
                     if (nt.hasCapability(CapabilityEnergy.ENERGY, dir.getOpposite())) {
                         IEnergyStorage store = (IEnergyStorage)nt.getCapability(CapabilityEnergy.ENERGY, dir.getOpposite());
-                        if (store.canReceive()) {
-                            getParent().getStore().extractEnergy(store.receiveEnergy(getParent().getStore().getEnergyStored(), false), false);
+                        if (store != null && store.canReceive() && !(store instanceof BatteryEnergyStorage.InputBatteryEnergyStorage && ((BatteryEnergyStorage.InputBatteryEnergyStorage)store).isFrom(getParent().getStore()))) {
+                            store.receiveEnergy(getParent().getStore().extractEnergy(store.receiveEnergy(getParent().getStore().getEnergyStored(), true), false), false);
                         }
                     }
                     //Buildcraft
@@ -73,10 +73,13 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
                     }
                 }
             }
+            if (getParent().updatedThisTick()) {
+                markDirty();
+            }
         }
     }
 
-    //Forge Energy
+    // Forge Energy
     
     @Override
     public boolean hasCapability(Capability<?> cpblt, EnumFacing ef) {
@@ -103,8 +106,8 @@ public class TileEntityBatteryConnector extends TileEntityBatteryMultiblock impl
     }
 
     
-    //IC2
-    
+    // IC2
+    // TODO: IC2 energy loops when i/o connectors touch
     private boolean ic2netreg = false;
     
     @Override

@@ -12,96 +12,6 @@ import net.minecraftforge.energy.EnergyStorage;
  * @author Ricky Talbot
  */
 public class BatteryEnergyStorage extends LongEnergyStorage {
-        
-    
-    private class InputBatteryEnergyStorage extends EnergyStorage {
-        
-        private BatteryEnergyStorage store;
-
-        public InputBatteryEnergyStorage(BatteryEnergyStorage store) {
-            super(store.getMaxEnergyStored());
-            this.store = store;
-        }
-
-        @Override
-        public boolean canExtract() {
-            return false;
-        }
-        
-        @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            return 0;
-        }
-        
-        @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-            return store.receiveEnergy(maxReceive, simulate);
-        }
-        
-    }
-    
-    private class OutputBatteryEnergyStorage extends EnergyStorage {
-        
-        private BatteryEnergyStorage store;
-
-        public OutputBatteryEnergyStorage(BatteryEnergyStorage store) {
-            super(store.getMaxEnergyStored());
-            this.store = store;
-        }
-
-        @Override
-        public boolean canReceive() {
-            return false;
-        }
-        
-        @Override
-        public int receiveEnergy(int maxReceive, boolean simulate) {
-            return 0;
-        }
-        
-        @Override
-        public int extractEnergy(int maxExtract, boolean simulate) {
-            return store.receiveEnergy(maxReceive, simulate);
-        }
-        
-    }
-    
-    public static class SlidingAverage {
-
-        private ArrayList<Integer> current = new ArrayList<>();
-        private LinkedList<Integer> history = new LinkedList<>();
-
-        public SlidingAverage(int max) {
-            for (int i = 0; i < max; i++) history.push(0);
-        }
-
-        public SlidingAverage(LinkedList<Integer> history) {
-            this.history = history;
-        }
-
-        public void push(Integer e) {
-            current.add(e);
-        }
-
-        public void next() {
-            history.push((int)current.stream().collect(Collectors.summingInt(i -> i)));
-            current = new ArrayList<>();
-            history.removeLast();
-        }
-
-        public double getAverage() {
-            return history.stream().collect(Collectors.averagingInt(i -> i));
-        }
-
-        public LinkedList<Integer> getHistory() {
-            return history;
-        }
-
-        public void setHistory(LinkedList<Integer> old) {
-            this.history = old;
-        }
-        
-    }
 
     private SlidingAverage out = new SlidingAverage(TileEntityBatteryController.AVERAGE_LENGTH);
     private SlidingAverage in = new SlidingAverage(TileEntityBatteryController.AVERAGE_LENGTH);
@@ -143,10 +53,10 @@ public class BatteryEnergyStorage extends LongEnergyStorage {
     }
 
     @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        if (maxExtract < 0) maxExtract = Integer.MAX_VALUE;
+    public int extractEnergy(int extract, boolean simulate) {
+        if (extract < 0) extract = Integer.MAX_VALUE;
         int oldRS = te.getRedstoneLevel();
-        int ret = super.extractEnergy(Math.min(maxExtract, getMaxTransfer()), simulate);
+        int ret = super.extractEnergy(Math.min(extract, getMaxTransfer()), simulate);
         if (!simulate) {
             if (oldRS == te.getRedstoneLevel()) {
                 te.markDirty(false, true);
@@ -159,10 +69,10 @@ public class BatteryEnergyStorage extends LongEnergyStorage {
     }
 
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        if (maxReceive < 0) maxReceive = Integer.MAX_VALUE;
+    public int receiveEnergy(int receive, boolean simulate) {
+        if (receive < 0) receive = Integer.MAX_VALUE;
         int oldRS = te.getRedstoneLevel();
-        int ret = super.receiveEnergy(Math.min(maxReceive, getMaxTransfer()), simulate);
+        int ret = super.receiveEnergy(Math.min(receive, getMaxTransfer()), simulate);
         if (!simulate) {
             if (oldRS == te.getRedstoneLevel()) {
                 te.markDirty(false, true);
@@ -174,12 +84,119 @@ public class BatteryEnergyStorage extends LongEnergyStorage {
         return ret;
     }
 
-
     public EnergyStorage getInputView() {
         return new InputBatteryEnergyStorage(this);
     }
 
     public EnergyStorage getOutputView() {
         return new OutputBatteryEnergyStorage(this);
+    }
+        
+    
+    public class InputBatteryEnergyStorage extends EnergyStorage {
+        
+        private BatteryEnergyStorage store;
+
+        public InputBatteryEnergyStorage(BatteryEnergyStorage store) {
+            super(store.getMaxEnergyStored());
+            this.store = store;
+        }
+
+        @Override
+        public boolean canExtract() {
+            return false;
+        }
+        
+        @Override
+        public int extractEnergy(int extract, boolean simulate) {
+            return 0;
+        }
+        
+        @Override
+        public int receiveEnergy(int receive, boolean simulate) {
+            return store.receiveEnergy(receive, simulate);
+        }
+
+        @Override
+        public int getEnergyStored() {
+            return store.getEnergyStored();
+        }
+        
+        public boolean isFrom(BatteryEnergyStorage parent) {
+            return store == parent;
+        }
+    }
+    
+    public class OutputBatteryEnergyStorage extends EnergyStorage {
+        
+        private BatteryEnergyStorage store;
+
+        public OutputBatteryEnergyStorage(BatteryEnergyStorage store) {
+            super(store.getMaxEnergyStored());
+            this.store = store;
+        }
+
+        @Override
+        public boolean canReceive() {
+            return false;
+        }
+        
+        @Override
+        public int receiveEnergy(int receive, boolean simulate) {
+            return 0;
+        }
+        
+        @Override
+        public int extractEnergy(int extract, boolean simulate) {
+            return store.receiveEnergy(extract, simulate);
+        }
+
+        @Override
+        public int getEnergyStored() {
+            return store.getEnergyStored();
+        }
+        
+        public boolean isFrom(BatteryEnergyStorage parent) {
+            return store == parent;
+        }
+        
+    }
+    
+    public static class SlidingAverage {
+
+        private ArrayList<Integer> current = new ArrayList<>();
+        private LinkedList<Integer> history = new LinkedList<>();
+
+        public SlidingAverage(int max) {
+            for (int i = 0; i < max; i++) history.push(0);
+        }
+
+        public SlidingAverage(LinkedList<Integer> history) {
+            this.history = history;
+        }
+
+        public void push(Integer e) {
+            current.add(e);
+        }
+
+        public void next() {
+            history.push((int)current.stream().collect(Collectors.summingInt(i -> i)));
+            System.out.println(history.get(0));
+            current = new ArrayList<>();
+            history.removeLast();
+        }
+
+        public double getAverage() {
+            return history.stream().collect(Collectors.averagingInt(i -> i));
+        }
+
+        public LinkedList<Integer> getHistory() {
+            return history;
+        }
+
+        public void setHistory(LinkedList<Integer> old) {
+            this.history = old;
+        }
+        
     }
 }
