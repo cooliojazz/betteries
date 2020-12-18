@@ -1,0 +1,17 @@
+tile.reinforced_obsidian.name=Reinforced Obsidian
+tile.hyper_reinforced_obsidian.name=Hyper Reinforced Obsidian
+tile.battery_casing.name=Simple Battery Casing
+tile.battery_casing_2.name=Battery Casing
+tile.battery_casing_3.name=Super Battery Casing
+tile.battery_casing_4.name=Hyper Battery Casing
+tile.battery_connector.name=Battery Connector
+tile.battery_controller.name=Battery Controller
+tile.battery_computer_connector.name=Battery Computer Connector
+item.compressed_redstone.name=Compressed Redstone Bundle
+item.stabilizer_ring.name=Stabilizer Ring
+item.energy_bundle.name=Stable Energy Bundle
+item.super_stabilizer_ring.name=Super Stabilizer Ring
+item.super_energy_bundle.name=Super Stable Energy Bundle
+item.hyper_stabilizer_ring.name=Hyper Stabilizer Ring
+item.hyper_energy_bundle.name=Hyper Stable Energy Bundle
+itemGroup.betteries=Betteries
